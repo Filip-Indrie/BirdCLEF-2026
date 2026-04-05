@@ -74,14 +74,9 @@ def get_single_bird_dataloader(batch_size, train_split=0.8):
 
     return train_loader, val_loader
 
-# TO DO: - indexeaza toate entry-urile dupa file ID ca sa poti sa faci split dupa files, nu dupa snippets
-#        - fa split dupa id
-#        - fa ca iteratorii de la get_soundscapes_dataloader sa returneze label-urile sub forma [batch, num_classes]
-
 class SoundscapesDataset(Dataset):
     def __init__(self):
-        self.df = pd.read_csv("../train_soundscapes_labels.csv").drop_duplicates(subset=["filename", "start", "primary_label"], keep="first")
-        self.df.assign(idx = self.df.groupby("filename").transform(""))
+        self.df = pd.read_csv("../train_soundscapes_labels.csv").drop_duplicates(subset=["filename", "start", "primary_label"], keep="first").reset_index(drop=True)
         self.classes = pd.read_csv("../taxonomy.csv")["primary_label"]
 
     def __len__(self):
@@ -100,19 +95,22 @@ class SoundscapesDataset(Dataset):
         waveform, _ = get_waveform(path, frames_to_read=frames_to_read, start=start_frame)
 
         labels = row["primary_label"].split(";")
-        labels_multi_hot = list(map(int, list(self.classes.isin(labels))))
+        labels_multi_hot_list = list(map(int, list(self.classes.isin(labels))))
+        labels_multi_hot = torch.tensor(labels_multi_hot_list, dtype=torch.float32)
 
         return waveform, labels_multi_hot
 
 def get_soundscapes_dataloader(batch_size, train_split=0.8):
     dataset = SoundscapesDataset()
 
-    indices = list(range(len(dataset)))
+    unique_files = dataset.df["filename"].unique()
+    train_files, val_files = train_test_split(unique_files, test_size=1 - train_split, random_state=RANDOM_SEED)
 
-    train_indices, test_indices = train_test_split(indices, test_size=1 - train_split, random_state=RANDOM_SEED)
+    train_indices = dataset.df[dataset.df["filename"].isin(train_files)].index.tolist()
+    val_indices = dataset.df[dataset.df["filename"].isin(val_files)].index.tolist()
 
     train_dataset = Subset(dataset, train_indices)
-    val_dataset = Subset(dataset, test_indices)
+    val_dataset = Subset(dataset, val_indices)
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
@@ -120,5 +118,7 @@ def get_soundscapes_dataloader(batch_size, train_split=0.8):
     return train_loader, val_loader
 
 if __name__ == "__main__":
-    train_iter, val_iter = get_soundscapes_dataloader(batch_size=1)
-    print(next(iter(train_iter))[1])
+    train_iter, val_iter = get_soundscapes_dataloader(batch_size=2)
+    for wave, label in train_iter:
+        print(wave, label)
+        break
