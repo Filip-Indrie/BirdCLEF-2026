@@ -3,6 +3,7 @@ import soundfile as sf
 import torch.nn.functional as F
 import random
 import pandas as pd
+from torchaudio.transforms import MelSpectrogram
 from collections import Counter
 from torchvision.datasets import DatasetFolder
 from torch.utils.data import DataLoader, Subset, Dataset
@@ -13,6 +14,8 @@ TARGET_SECONDS = 5
 TARGET_FRAMES = TARGET_SECONDS * TARGET_SAMPLE_RATE
 NUM_CLASSES = 234
 RANDOM_SEED = 42
+
+__all__ = ["get_soundscapes_dataloader", "get_single_bird_dataloader"]
 
 def get_waveform(path, start=0, frames_to_read=-1):
     """
@@ -125,8 +128,16 @@ def get_soundscapes_dataloader(batch_size, train_split=0.8):
 
     return train_loader, val_loader
 
+def wave_to_spectrogram(waveform, window_length=400, hop_length=200, n_mel_bands=128):
+    """
+        Transforms a waveform into a mel-spectrogram.
+    """
+    transform = MelSpectrogram(n_fft=window_length, hop_length=hop_length, n_mels=n_mel_bands)
+    return transform(waveform)
+
 if __name__ == "__main__":
     train_iter, val_iter = get_soundscapes_dataloader(batch_size=2)
     for wave, label in train_iter:
-        print(wave, label)
+        spectrogram = wave_to_spectrogram(wave)
+        print(spectrogram.shape)
         break
