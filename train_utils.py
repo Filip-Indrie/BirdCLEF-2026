@@ -54,10 +54,10 @@ def get_single_bird_dataloader(batch_size, train_split=0.8):
     targets = dataset.targets
 
     class_counts = Counter(targets)
-    single_sample_classes = set(label for label, count in class_counts.items() if count == 1)
+    single_sample_classes = set(cls for cls, count in class_counts.items() if count == 1)
 
-    single_sample_indices = [idx for idx, label in enumerate(targets) if label in single_sample_classes]
-    multiple_sample_indices = [idx for idx, label in enumerate(targets) if label not in single_sample_classes]
+    single_sample_indices = [idx for idx, cls in enumerate(targets) if cls in single_sample_classes]
+    multiple_sample_indices = [idx for idx, cls in enumerate(targets) if cls not in single_sample_classes]
 
     multiple_sample_targets = [targets[idx] for idx in multiple_sample_indices]
 
@@ -75,6 +75,11 @@ def get_single_bird_dataloader(batch_size, train_split=0.8):
     return train_loader, val_loader
 
 class SoundscapesDataset(Dataset):
+    """
+        Combines the label's .csv with the actual audio files to create
+        a Dataset class able to provide the waveform of the audio file
+        paired with its labels.
+    """
     def __init__(self):
         self.df = pd.read_csv("../train_soundscapes_labels.csv").drop_duplicates(subset=["filename", "start", "primary_label"], keep="first").reset_index(drop=True)
         self.classes = pd.read_csv("../taxonomy.csv")["primary_label"]
@@ -101,6 +106,9 @@ class SoundscapesDataset(Dataset):
         return waveform, labels_multi_hot
 
 def get_soundscapes_dataloader(batch_size, train_split=0.8):
+    """
+        Splits the soundscapes data into training and validation sets and returns a DataLoader for both.
+    """
     dataset = SoundscapesDataset()
 
     unique_files = dataset.df["filename"].unique()
