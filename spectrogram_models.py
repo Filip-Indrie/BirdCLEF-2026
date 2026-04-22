@@ -3,6 +3,8 @@ from torch import nn
 from abc import ABC
 from load_utils import NUM_CLASSES
 
+__all__ = ['ResNet18']
+
 class CustomSpectrogramModel(nn.Module, ABC):
     """
         Abstract class designed to ease the implementation
