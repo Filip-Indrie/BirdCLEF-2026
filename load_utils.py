@@ -41,7 +41,10 @@ def get_waveform(path, start=0, frames_to_read=-1):
         start_idx = random.randint(0, max_start)
         waveform = waveform[:, start_idx : start_idx + TARGET_FRAMES]
 
-    return tuple([waveform, sample_rate])
+    return waveform
+
+def index_to_one_hot(target_index):
+    return F.one_hot(torch.tensor(target_index), num_classes=NUM_CLASSES).to(torch.float32)
 
 # IMPROVEMENT IDEA: Use voice activity detection (VAD --> torchaudio implementations)
 # to extract only the chunks where the bird actually sings
@@ -101,7 +104,7 @@ class SoundscapesDataset(Dataset):
         frames_to_read = 5 * TARGET_SAMPLE_RATE
 
         path = f"../train_soundscapes/{file_name}"
-        waveform, _ = get_waveform(path, frames_to_read=frames_to_read, start=start_frame)
+        waveform = get_waveform(path, frames_to_read=frames_to_read, start=start_frame)
 
         labels = row["primary_label"].split(";")
         labels_multi_hot_list = list(map(int, list(self.classes.isin(labels))))
@@ -149,5 +152,5 @@ if __name__ == "__main__":
     for wave, label in train_iter:
         spectrograms = wave_to_spectrogram(wave)
         print(spectrograms.shape)
-
+        print(label)
         break
