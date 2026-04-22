@@ -16,7 +16,7 @@ TARGET_FRAMES = TARGET_SECONDS * TARGET_SAMPLE_RATE
 NUM_CLASSES = 234
 RANDOM_SEED = 42
 
-__all__ = ["get_soundscapes_dataloader", "get_single_bird_dataloader"]
+__all__ = ["get_soundscapes_dataloader", "get_single_bird_dataloader", "NUM_CLASSES"]
 
 def get_waveform(path, start=0, frames_to_read=-1):
     """
