@@ -3,11 +3,12 @@ import soundfile as sf
 import torch.nn.functional as F
 import random
 import pandas as pd
-from torchaudio.transforms import MelSpectrogram
+from torchaudio.transforms import MelSpectrogram, AmplitudeToDB
 from collections import Counter
 from torchvision.datasets import DatasetFolder
 from torch.utils.data import DataLoader, Subset, Dataset
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 
 TARGET_SAMPLE_RATE = 32000 # 32kHz
 TARGET_SECONDS = 5
@@ -128,16 +129,25 @@ def get_soundscapes_dataloader(batch_size, train_split=0.8):
 
     return train_loader, val_loader
 
-def wave_to_spectrogram(waveform, window_length=400, hop_length=200, n_mel_bands=128):
+# COULD USE: PCEN (Per-Channel Energy Normalization).
+def wave_to_spectrogram(waveform, window_length=1024, hop_length=320, n_mel_bands=128, f_min=500, f_max=15000):
     """
         Transforms a waveform into a mel-spectrogram.
     """
-    transform = MelSpectrogram(n_fft=window_length, hop_length=hop_length, n_mels=n_mel_bands)
-    return transform(waveform)
+    transform_spectrogram = MelSpectrogram(sample_rate=TARGET_SAMPLE_RATE, n_fft=window_length, hop_length=hop_length, n_mels=n_mel_bands, f_min=f_min, f_max=f_max)
+    transform_db = AmplitudeToDB(stype='power')
+    return transform_db(transform_spectrogram(waveform))
+
+def visualize_spectrogram(spectrogram):
+    plt.figure(figsize=(10, 4))
+    plt.imshow(spectrogram[0].numpy(), origin='lower', aspect='auto')
+    plt.axis('off')
+    plt.show()
 
 if __name__ == "__main__":
     train_iter, val_iter = get_soundscapes_dataloader(batch_size=2)
     for wave, label in train_iter:
-        spectrogram = wave_to_spectrogram(wave)
-        print(spectrogram.shape)
+        spectrograms = wave_to_spectrogram(wave)
+        print(spectrograms.shape)
+
         break
