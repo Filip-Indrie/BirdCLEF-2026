@@ -43,12 +43,25 @@ def get_waveform(path, start=0, frames_to_read=-1):
 
     return waveform
 
+# COULD USE: PCEN (Per-Channel Energy Normalization).
+def wave_to_spectrogram(waveform, window_length=1024, hop_length=320, n_mel_bands=128, f_min=500, f_max=15000):
+    """
+        Transforms a waveform into a mel-spectrogram.
+    """
+    transform_spectrogram = MelSpectrogram(sample_rate=TARGET_SAMPLE_RATE, n_fft=window_length, hop_length=hop_length, n_mels=n_mel_bands, f_min=f_min, f_max=f_max)
+    transform_db = AmplitudeToDB(stype='power')
+    return transform_db(transform_spectrogram(waveform))
+
+def get_spectrogram(path, start=0, frames_to_read=-1):
+    return wave_to_spectrogram(get_waveform(path, start, frames_to_read))
+
+
 def index_to_one_hot(target_index):
     return F.one_hot(torch.tensor(target_index), num_classes=NUM_CLASSES).to(torch.float32)
 
 # IMPROVEMENT IDEA: Use voice activity detection (VAD --> torchaudio implementations)
 # to extract only the chunks where the bird actually sings
-def get_single_bird_dataloader(batch_size, train_split=0.8):
+def get_single_bird_dataloader(batch_size, to_spectrogram: bool, train_split=0.8):
     """
         Splits the data into training and validation sets and returns a DataLoader for both.
         Classes that contain only one training sample will be in the training set.
@@ -56,7 +69,9 @@ def get_single_bird_dataloader(batch_size, train_split=0.8):
 
     path = "../train_audio"
 
-    dataset = DatasetFolder(root=path, loader=get_waveform, extensions=tuple([".ogg"]))
+    loader = get_spectrogram if to_spectrogram else get_waveform
+
+    dataset = DatasetFolder(root=path, loader=loader, extensions=tuple([".ogg"]))
 
     targets = dataset.targets
 
@@ -87,9 +102,10 @@ class SoundscapesDataset(Dataset):
         a Dataset class able to provide the waveform of the audio file
         paired with its labels.
     """
-    def __init__(self):
+    def __init__(self, to_spectrogram: bool):
         self.df = pd.read_csv("../train_soundscapes_labels.csv").drop_duplicates(subset=["filename", "start", "primary_label"], keep="first").reset_index(drop=True)
         self.classes = pd.read_csv("../taxonomy.csv")["primary_label"]
+        self.to_spectrogram = to_spectrogram
 
     def __len__(self):
         return len(self.df)
@@ -104,19 +120,22 @@ class SoundscapesDataset(Dataset):
         frames_to_read = 5 * TARGET_SAMPLE_RATE
 
         path = f"../train_soundscapes/{file_name}"
-        waveform = get_waveform(path, frames_to_read=frames_to_read, start=start_frame)
+
+        loader = get_spectrogram if self.to_spectrogram else get_waveform
+
+        ret = loader(path, frames_to_read=frames_to_read, start=start_frame)
 
         labels = row["primary_label"].split(";")
         labels_multi_hot_list = list(map(int, list(self.classes.isin(labels))))
         labels_multi_hot = torch.tensor(labels_multi_hot_list, dtype=torch.float32)
 
-        return waveform, labels_multi_hot
+        return ret, labels_multi_hot
 
-def get_soundscapes_dataloader(batch_size, train_split=0.8):
+def get_soundscapes_dataloader(batch_size, to_spectrogram: bool, train_split=0.8):
     """
         Splits the soundscapes data into training and validation sets and returns a DataLoader for both.
     """
-    dataset = SoundscapesDataset()
+    dataset = SoundscapesDataset(to_spectrogram)
 
     unique_files = dataset.df["filename"].unique()
     train_files, val_files = train_test_split(unique_files, test_size=1 - train_split, random_state=RANDOM_SEED)
@@ -131,15 +150,6 @@ def get_soundscapes_dataloader(batch_size, train_split=0.8):
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
     return train_loader, val_loader
-
-# COULD USE: PCEN (Per-Channel Energy Normalization).
-def wave_to_spectrogram(waveform, window_length=1024, hop_length=320, n_mel_bands=128, f_min=500, f_max=15000):
-    """
-        Transforms a waveform into a mel-spectrogram.
-    """
-    transform_spectrogram = MelSpectrogram(sample_rate=TARGET_SAMPLE_RATE, n_fft=window_length, hop_length=hop_length, n_mels=n_mel_bands, f_min=f_min, f_max=f_max)
-    transform_db = AmplitudeToDB(stype='power')
-    return transform_db(transform_spectrogram(waveform))
 
 def visualize_spectrogram(spectrogram):
     plt.figure(figsize=(10, 4))
