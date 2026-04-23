@@ -26,7 +26,7 @@ def evaluate_accuracy(net, data_iter, loss, device):
     with torch.no_grad():
         for x, y in data_iter:
             x, y = x.to(device), y.to(device)
-            y_hat = net(x, inference=True)[0]
+            y_hat = net(x)
             l = loss(y_hat, y)
 
             with torch.no_grad():
@@ -52,7 +52,7 @@ def train_epoch_amp(net, train_iter, loss, optimizer, scaler, device):
         optimizer.zero_grad()
 
         with torch.amp.autocast("cuda"):
-            y_hat = net(x, inference=False)[0]
+            y_hat = net(x)
             l = loss(y_hat, y)
 
         scaler.scale(l).backward()
@@ -77,6 +77,9 @@ def train(net, train_iter, val_iter, num_epochs, patience, optimizer,  device, d
     best_val_accuracy = 0
     counter = 0
 
+    # fidget with pos_weight
+    # fidget with loss params so it doesn't just guess all 0s for single bird
+    # it currently does this and gets 99.9% accuracy
     loss = nn.BCEWithLogitsLoss()
 
     net.apply(init_weights)
@@ -86,7 +89,7 @@ def train(net, train_iter, val_iter, num_epochs, patience, optimizer,  device, d
     dir_name = "Measurements/" + net_name + "/"
     os.makedirs(dir_name, exist_ok=True)
 
-    stats_file_name = dir_name + "LR_" + optimizer.state_dict()['param_groups'][0]['lr'] + ".txt"
+    stats_file_name = dir_name + "LR_" + str(optimizer.state_dict()['param_groups'][0]['lr']) + ".txt"
     if not os.path.exists(stats_file_name) or delete_old_measurements:
         stats_file = open(stats_file_name, "w", encoding="utf-8")
         stats_file.write(str(net) + "\n\n")

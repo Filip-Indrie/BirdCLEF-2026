@@ -55,7 +55,6 @@ def wave_to_spectrogram(waveform, window_length=1024, hop_length=320, n_mel_band
 def get_spectrogram(path, start=0, frames_to_read=-1):
     return wave_to_spectrogram(get_waveform(path, start, frames_to_read))
 
-
 def index_to_one_hot(target_index):
     return F.one_hot(torch.tensor(target_index), num_classes=NUM_CLASSES).to(torch.float32)
 
@@ -71,7 +70,7 @@ def get_single_bird_dataloader(batch_size, to_spectrogram: bool, train_split=0.8
 
     loader = get_spectrogram if to_spectrogram else get_waveform
 
-    dataset = DatasetFolder(root=path, loader=loader, extensions=tuple([".ogg"]))
+    dataset = DatasetFolder(root=path, loader=loader, target_transform=index_to_one_hot, extensions=tuple([".ogg"]))
 
     targets = dataset.targets
 
@@ -158,9 +157,8 @@ def visualize_spectrogram(spectrogram):
     plt.show()
 
 if __name__ == "__main__":
-    train_iter, val_iter = get_soundscapes_dataloader(batch_size=2)
-    for wave, label in train_iter:
-        spectrograms = wave_to_spectrogram(wave)
-        print(spectrograms.shape)
-        print(label)
+    train_iter, val_iter = get_single_bird_dataloader(batch_size=2, to_spectrogram=True)
+    for item, label in train_iter:
+        print(item.shape)
+        print(label.shape)
         break

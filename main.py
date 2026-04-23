@@ -15,12 +15,13 @@ if __name__ == '__main__':
     lr = 1e-3
     weight_decay = 1e-3
 
-    train_iter, val_iter = get_single_bird_dataloader(batch_size)
+    train_iter, val_iter = get_single_bird_dataloader(batch_size, to_spectrogram=True)
 
     device = try_gpu()
     print(f"Training on {torch.cuda.get_device_name(device)}")
 
     for net in nets:
         optimizer = torch.optim.AdamW(net.parameters(), lr=lr, weight_decay=weight_decay)
-        train(net, train_iter, val_iter, num_epochs, patience, optimizer, device)
+        train(net, train_iter, val_iter, 1, patience, optimizer, device)
+
 
