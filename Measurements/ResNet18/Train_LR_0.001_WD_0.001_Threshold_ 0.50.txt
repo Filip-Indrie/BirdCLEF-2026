@@ -72,9 +72,24 @@ Params size (MB): 45.18
 Estimated Total Size (MB): 96.59
 ==========================================================================================
 
+20:16:45 Epoch 1
 
+        Train stats:
+        Loss:  1.6607 | F1:  0.0087 | Precision:  0.0044 | Recall:  0.3330
+        Validation stats:
+        Loss:  1.2860 | F1:  0.0076 | Precision:  0.0045 | Recall:  0.3325
+        Epoch time: 257 seconds =  4.28 minutes
+        ===============================================================================================================
+        
+Best Validation F1 0.0076, Epoch: 1, Training Time: 257.30s
 
+20:27:47 Epoch 1
 
-
-Epoch 1, Train loss 0.03, Train accuracy 99.35, Validation loss 0.02, Validation accuracy 99.56
-Best Validation Accuracy 99.56, Epoch: 1, Training Time: 698.66s
+        Train stats:
+        Loss:  1.6988 | F1:  0.0086 | Precision:  0.0044 | Recall:  0.3394
+        Validation stats:
+        Loss:  1.3631 | F1:  0.0083 | Precision:  0.0044 | Recall:  0.3937
+        Epoch time: 224 seconds =  3.73 minutes
+        ===============================================================================================================
+        
+Best Validation F1 0.0083, Epoch: 1, Training Time: 224.35s

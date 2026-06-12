@@ -3,7 +3,6 @@ import soundfile as sf
 import torch.nn.functional as F
 import random
 import pandas as pd
-from torchaudio.transforms import MelSpectrogram, AmplitudeToDB
 from collections import Counter
 from torchvision.datasets import DatasetFolder
 from torch.utils.data import DataLoader, Subset, Dataset
@@ -16,7 +15,7 @@ TARGET_FRAMES = TARGET_SECONDS * TARGET_SAMPLE_RATE
 NUM_CLASSES = 234
 RANDOM_SEED = 42
 
-__all__ = ["get_soundscapes_dataloader", "get_single_bird_dataloader", "NUM_CLASSES"]
+__all__ = ["get_soundscapes_dataloader", "get_single_bird_dataloader", "NUM_CLASSES", "TARGET_SAMPLE_RATE"]
 
 def get_waveform(path, start=0, frames_to_read=-1):
     """
@@ -42,17 +41,6 @@ def get_waveform(path, start=0, frames_to_read=-1):
         waveform = waveform[:, start_idx : start_idx + TARGET_FRAMES]
 
     return waveform
-
-def wave_to_spectrogram(waveform, window_length=1024, hop_length=320, n_mel_bands=128, f_min=500, f_max=15000):
-    """
-        Transforms a waveform into a mel-spectrogram.
-    """
-    transform_spectrogram = MelSpectrogram(sample_rate=TARGET_SAMPLE_RATE, n_fft=window_length, hop_length=hop_length, n_mels=n_mel_bands, f_min=f_min, f_max=f_max)
-    transform_db = AmplitudeToDB(stype='power')
-    return transform_db(transform_spectrogram(waveform))
-
-def get_spectrogram(path, start=0, frames_to_read=-1):
-    return wave_to_spectrogram(get_waveform(path, start, frames_to_read))
 
 def index_to_one_hot(target_index):
     return F.one_hot(torch.tensor(target_index), num_classes=NUM_CLASSES).to(torch.float32)
@@ -148,7 +136,7 @@ def visualize_spectrogram(spectrogram):
     plt.show()
 
 if __name__ == "__main__":
-    train_iter, val_iter = get_soundscapes_dataloader(batch_size=2)
+    train_iter, val_iter = get_single_bird_dataloader(batch_size=2)
     for item, label in train_iter:
         print(item.shape)
         print(label.shape)
