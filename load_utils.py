@@ -43,7 +43,6 @@ def get_waveform(path, start=0, frames_to_read=-1):
 
     return waveform
 
-# COULD USE: PCEN (Per-Channel Energy Normalization).
 def wave_to_spectrogram(waveform, window_length=1024, hop_length=320, n_mel_bands=128, f_min=500, f_max=15000):
     """
         Transforms a waveform into a mel-spectrogram.
@@ -58,19 +57,14 @@ def get_spectrogram(path, start=0, frames_to_read=-1):
 def index_to_one_hot(target_index):
     return F.one_hot(torch.tensor(target_index), num_classes=NUM_CLASSES).to(torch.float32)
 
-# IMPROVEMENT IDEA: Use voice activity detection (VAD --> torchaudio implementations)
-# to extract only the chunks where the bird actually sings
-def get_single_bird_dataloader(batch_size, to_spectrogram: bool, train_split=0.8):
+def get_single_bird_dataloader(batch_size, train_split=0.8):
     """
         Splits the data into training and validation sets and returns a DataLoader for both.
         Classes that contain only one training sample will be in the training set.
     """
 
     path = "../train_audio"
-
-    loader = get_spectrogram if to_spectrogram else get_waveform
-
-    dataset = DatasetFolder(root=path, loader=loader, target_transform=index_to_one_hot, extensions=tuple([".ogg"]))
+    dataset = DatasetFolder(root=path, loader=get_waveform, target_transform=index_to_one_hot, extensions=tuple([".ogg"]))
 
     targets = dataset.targets
 
@@ -101,10 +95,9 @@ class SoundscapesDataset(Dataset):
         a Dataset class able to provide the waveform of the audio file
         paired with its labels.
     """
-    def __init__(self, to_spectrogram: bool):
+    def __init__(self):
         self.df = pd.read_csv("../train_soundscapes_labels.csv").drop_duplicates(subset=["filename", "start", "primary_label"], keep="first").reset_index(drop=True)
         self.classes = pd.read_csv("../taxonomy.csv")["primary_label"]
-        self.to_spectrogram = to_spectrogram
 
     def __len__(self):
         return len(self.df)
@@ -120,9 +113,7 @@ class SoundscapesDataset(Dataset):
 
         path = f"../train_soundscapes/{file_name}"
 
-        loader = get_spectrogram if self.to_spectrogram else get_waveform
-
-        ret = loader(path, frames_to_read=frames_to_read, start=start_frame)
+        ret = get_waveform(path, frames_to_read=frames_to_read, start=start_frame)
 
         labels = row["primary_label"].split(";")
         labels_multi_hot_list = list(map(int, list(self.classes.isin(labels))))
@@ -130,11 +121,11 @@ class SoundscapesDataset(Dataset):
 
         return ret, labels_multi_hot
 
-def get_soundscapes_dataloader(batch_size, to_spectrogram: bool, train_split=0.8):
+def get_soundscapes_dataloader(batch_size, train_split=0.8):
     """
         Splits the soundscapes data into training and validation sets and returns a DataLoader for both.
     """
-    dataset = SoundscapesDataset(to_spectrogram)
+    dataset = SoundscapesDataset()
 
     unique_files = dataset.df["filename"].unique()
     train_files, val_files = train_test_split(unique_files, test_size=1 - train_split, random_state=RANDOM_SEED)
@@ -157,7 +148,7 @@ def visualize_spectrogram(spectrogram):
     plt.show()
 
 if __name__ == "__main__":
-    train_iter, val_iter = get_single_bird_dataloader(batch_size=2, to_spectrogram=True)
+    train_iter, val_iter = get_soundscapes_dataloader(batch_size=2)
     for item, label in train_iter:
         print(item.shape)
         print(label.shape)
