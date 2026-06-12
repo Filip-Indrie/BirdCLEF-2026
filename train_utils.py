@@ -117,7 +117,7 @@ def train_epoch_amp(net, train_iter, loss, spectrogram_transform, augment_pipeli
 
     return avg_loss, macro_f1, macro_precision, macro_recall
 
-def train(net, spectrogram_model: bool, fine_tune: bool, pre_trained: bool, lr, weight_decay, threshold: float, train_iter, val_iter, num_epochs, patience, delete_old_measurements = False):
+def train(net, spectrogram_model: bool, fine_tune: bool, pre_trained: bool, lr, weight_decay, threshold: float, train_iter, val_iter, num_epochs, patience, delete_old_measurements: bool = False, save_json: bool = False, save_weights: bool = False):
     """Train a model."""
 
     train_loss_all = []
@@ -256,22 +256,24 @@ def train(net, spectrogram_model: bool, fine_tune: bool, pre_trained: bool, lr, 
     stats_file.write(train_stats_string + "\n")
     stats_file.close()
 
-    with open(stats_base_file_name + ".json", "w", encoding="utf-8") as json_file:
-        history = {
-            "num_params": sum(p.numel() for p in net.parameters()),
-            "training_time": end_time - start_time,
-            "train_loss": train_loss_all,
-            "train_f1": train_f1_all,
-            "train_precision": train_precision_all,
-            "train_recall": train_recall_all,
-            "val_loss": val_loss_all,
-            "val_f1": val_f1_all,
-            "val_precision": val_precision_all,
-            "val_recall": val_recall_all,
-        }
-        json.dump(history, json_file, indent=4)
+    if save_json:
+        with open(stats_base_file_name + ".json", "w", encoding="utf-8") as json_file:
+            history = {
+                "num_params": sum(p.numel() for p in net.parameters()),
+                "training_time": end_time - start_time,
+                "train_loss": train_loss_all,
+                "train_f1": train_f1_all,
+                "train_precision": train_precision_all,
+                "train_recall": train_recall_all,
+                "val_loss": val_loss_all,
+                "val_f1": val_f1_all,
+                "val_precision": val_precision_all,
+                "val_recall": val_recall_all,
+            }
+            json.dump(history, json_file, indent=4)
 
-    torch.save(best_weights, stats_base_file_name + ".pth")
+    if save_weights:
+        torch.save(best_weights, stats_base_file_name + ".pth")
 
     return train_loss_all, train_f1_all, val_loss_all, val_f1_all
 
