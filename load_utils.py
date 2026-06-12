@@ -17,6 +17,8 @@ RANDOM_SEED = 42
 
 __all__ = ["get_soundscapes_dataloader", "get_single_bird_dataloader", "NUM_CLASSES", "TARGET_SAMPLE_RATE"]
 
+dataset_folder = ".."
+
 def get_waveform(path, start=0, frames_to_read=-1):
     """
            Returns the waveform and the sample rate of the audio file.
@@ -51,7 +53,7 @@ def get_single_bird_dataloader(batch_size, train_split=0.8):
         Classes that contain only one training sample will be in the training set.
     """
 
-    path = "../train_audio"
+    path = f"{dataset_folder}/train_audio"
     dataset = DatasetFolder(root=path, loader=get_waveform, target_transform=index_to_one_hot, extensions=tuple([".ogg"]))
 
     targets = dataset.targets
@@ -84,8 +86,8 @@ class SoundscapesDataset(Dataset):
         paired with its labels.
     """
     def __init__(self):
-        self.df = pd.read_csv("../train_soundscapes_labels.csv").drop_duplicates(subset=["filename", "start", "primary_label"], keep="first").reset_index(drop=True)
-        self.classes = pd.read_csv("../taxonomy.csv")["primary_label"]
+        self.df = pd.read_csv(f"{dataset_folder}/train_soundscapes_labels.csv").drop_duplicates(subset=["filename", "start", "primary_label"], keep="first").reset_index(drop=True)
+        self.classes = pd.read_csv(f"{dataset_folder}/taxonomy.csv")["primary_label"]
 
     def __len__(self):
         return len(self.df)
@@ -99,7 +101,7 @@ class SoundscapesDataset(Dataset):
         start_frame = start_sec * TARGET_SAMPLE_RATE
         frames_to_read = 5 * TARGET_SAMPLE_RATE
 
-        path = f"../train_soundscapes/{file_name}"
+        path = f"{dataset_folder}/train_soundscapes/{file_name}"
 
         ret = get_waveform(path, frames_to_read=frames_to_read, start=start_frame)
 
