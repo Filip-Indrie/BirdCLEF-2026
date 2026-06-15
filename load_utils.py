@@ -227,9 +227,12 @@ def get_soundscapes_dataloader(
     balanced_train_df = dataset.df.iloc[balanced_train_indices]
     train_pos_weights = calculate_pos_weights_soundscapes(device, balanced_train_df, clamp_max=pos_weights_clamp_max)
 
-    if validation_total_samples is not None and validation_total_samples < len(val_indices):
+    target_val_count = int(len(balanced_train_indices) * ((1 - train_split) / train_split))
+    val_size = validation_total_samples if validation_total_samples is not None else target_val_count
+
+    if val_size < len(val_indices):
         np.random.seed(RANDOM_SEED)
-        val_indices = np.random.choice(val_indices, size=validation_total_samples, replace=False).tolist()
+        val_indices = np.random.choice(val_indices, size=val_size, replace=False).tolist()
 
     train_dataset = Subset(dataset, balanced_train_indices)
     val_dataset = Subset(dataset, val_indices)
