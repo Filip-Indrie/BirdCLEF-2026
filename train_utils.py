@@ -1,6 +1,7 @@
 import time
 import datetime
 import os
+from dotenv import load_dotenv
 import torch
 import torchmetrics
 from torch import nn
@@ -9,9 +10,11 @@ import json
 import copy
 from torchaudio.transforms import MelSpectrogram, AmplitudeToDB, TimeMasking, FrequencyMasking
 
-from load_utils import NUM_CLASSES, TARGET_SAMPLE_RATE
+load_dotenv()
+NUM_CLASSES = int(os.getenv("NUM_CLASSES"))
+TARGET_SAMPLE_RATE = int(os.getenv("TARGET_SAMPLE_RATE"))
 
-__all__ = ['train']
+__all__ = ['train_model', 'try_gpu', 'wave_to_spectrogram']
 
 def init_weights(layer):
     if type(layer) == nn.Linear or type(layer) == nn.Conv2d:
@@ -31,13 +34,24 @@ def wave_to_spectrogram(waveform, spectrogram_transform):
     """
     return spectrogram_transform(waveform)
 
-def evaluate_accuracy(net, data_iter, loss, spectrogram_transform, f1_metric, precision_metric, recall_metric, device):
+def add_noise_to_wave(device, wave, min_amplitude=0.001, max_amplitude=0.015, p=0.5):
+    if torch.rand(1).item() > p:
+        return wave
+
+    noise_level = torch.empty(1).uniform_(min_amplitude, max_amplitude).to(device)
+    noise = torch.randn_like(wave) * noise_level
+    return torch.clamp(wave + noise, min=-1.0, max=1.0)
+
+def evaluate_accuracy(
+        net, data_iter, loss, spectrogram_transform,
+        f1_metric, precision_metric, recall_metric, device
+):
     """Compute the accuracy for a model on a dataset."""
     net.eval()  # Set the model to evaluation mode
 
     total_loss = 0.0
 
-    validation_loop = tqdm.tqdm(data_iter, desc="Validation batches")
+    validation_loop = tqdm.tqdm(data_iter, desc="Validation Batches")
 
     with torch.no_grad():
         for wave, labels in validation_loop:
@@ -45,8 +59,9 @@ def evaluate_accuracy(net, data_iter, loss, spectrogram_transform, f1_metric, pr
 
             model_input = wave if spectrogram_transform is None else wave_to_spectrogram(wave, spectrogram_transform)
 
-            logits = net(model_input)
-            l = loss(logits, labels)
+            with torch.amp.autocast("cuda", dtype=torch.bfloat16):
+                logits = net(model_input)
+                l = loss(logits, labels)
             total_loss += float(l)
 
             probs = torch.sigmoid(logits)
@@ -67,7 +82,11 @@ def evaluate_accuracy(net, data_iter, loss, spectrogram_transform, f1_metric, pr
 
     return avg_loss, macro_f1, macro_precision, macro_recall
 
-def train_epoch_amp(net, train_iter, loss, spectrogram_transform, augment_pipeline, optimizer, scaler, f1_metric, precision_metric, recall_metric, device):
+def train_epoch_amp(
+        net, train_iter, loss, positive_label_smoothing: float,
+        spectrogram_transform, augment_pipeline, optimizer, add_noise: bool,
+        f1_metric, precision_metric, recall_metric, device
+):
     # Uses automatic mixed precision
 
     net.train()
@@ -79,6 +98,8 @@ def train_epoch_amp(net, train_iter, loss, spectrogram_transform, augment_pipeli
     for wave, labels in training_loop:
         wave, labels = wave.to(device), labels.to(device)
 
+        if add_noise: wave = add_noise_to_wave(device, wave)
+
         with torch.no_grad():
             if spectrogram_transform is not None:
                 model_input = wave_to_spectrogram(wave, spectrogram_transform)
@@ -88,13 +109,19 @@ def train_epoch_amp(net, train_iter, loss, spectrogram_transform, augment_pipeli
 
         optimizer.zero_grad()
 
-        with torch.amp.autocast("cuda"):
+        with torch.amp.autocast("cuda", dtype=torch.bfloat16):
             logits = net(model_input)
-            l = loss(logits, labels)
 
-        scaler.scale(l).backward()
-        scaler.step(optimizer)
-        scaler.update()
+            # ASYMMETRIC (POSITIVE) LABEL SMOOTHING
+            smoothed_labels = labels * (1.0 - positive_label_smoothing)
+
+            l = loss(logits, smoothed_labels)
+
+        l.backward()
+
+        torch.nn.utils.clip_grad_norm_(net.parameters(), max_norm=2.0)
+
+        optimizer.step()
 
         with torch.no_grad():
             total_loss += float(l)
@@ -117,7 +144,28 @@ def train_epoch_amp(net, train_iter, loss, spectrogram_transform, augment_pipeli
 
     return avg_loss, macro_f1, macro_precision, macro_recall
 
-def train(net, spectrogram_model: bool, fine_tune: bool, pre_trained: bool, lr, weight_decay, threshold: float, train_iter, val_iter, num_epochs, patience, delete_old_measurements: bool = False, save_json: bool = False, save_weights: bool = False):
+
+class MultiLabelFocalLoss(nn.Module):
+    def __init__(self, pos_weight=None, gamma=2.0):
+        super().__init__()
+        self.bce = nn.BCEWithLogitsLoss(pos_weight=pos_weight, reduction='none')
+        self.gamma = gamma
+
+    def forward(self, logits, targets):
+        bce_loss = self.bce(logits, targets)
+        probs = torch.sigmoid(logits)
+        p_t = probs * targets + (1 - probs) * (1 - targets)
+        focal_weight = (1 - p_t) ** self.gamma
+        loss = focal_weight * bce_loss
+        return loss.mean()
+
+def train_model(
+        device, net, spectrogram_model: bool, pre_trained: bool,
+        lr, weight_decay, positive_label_smoothing: float, threshold: float, add_noise: bool,
+        train_iter, val_iter, pos_weights, num_epochs, patience,
+        delete_old_measurements: bool = False, save_json: bool = False, save_weights: bool = False,
+        save_folder: str | None = None
+):
     """Train a model."""
 
     train_loss_all = []
@@ -129,7 +177,6 @@ def train(net, spectrogram_model: bool, fine_tune: bool, pre_trained: bool, lr, 
     val_precision_all = []
     val_recall_all = []
 
-    device = try_gpu()
     print(f"Training on {torch.cuda.get_device_name(device)}")
 
     if spectrogram_model:
@@ -151,21 +198,7 @@ def train(net, spectrogram_model: bool, fine_tune: bool, pre_trained: bool, lr, 
     best_weights = None
     counter = 0
 
-    pos_counts = torch.zeros(NUM_CLASSES, device=device)
-    total_samples = 0
-
-    for _, labels in train_iter:
-        labels = labels.to(device)
-        pos_counts += labels.sum(dim=0)
-        total_samples += labels.size(0)
-
-    pos_counts = torch.clamp(pos_counts, min=1.0)
-    neg_counts = total_samples - pos_counts
-    pos_weights = (neg_counts / pos_counts).to(device)
-
-    print('Finished calculating pos_weights')
-
-    loss = nn.BCEWithLogitsLoss(pos_weight=pos_weights)
+    loss = MultiLabelFocalLoss(pos_weight=pos_weights, gamma=2)
 
     if not pre_trained:
         net.apply(init_weights)
@@ -173,24 +206,28 @@ def train(net, spectrogram_model: bool, fine_tune: bool, pre_trained: bool, lr, 
 
     optimizer = torch.optim.AdamW(net.parameters(), lr=lr, weight_decay=weight_decay)
     lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=patience // 3)
-    scaler = torch.amp.GradScaler()
 
     net_name = type(net).__name__
-    dir_name = "Measurements/" + net_name + "/"
-    os.makedirs(dir_name, exist_ok=True)
+    dir_name = "Measurements/" + net_name
 
-    mode_str = "Fine_tune" if fine_tune else "Train"
-    lr_str = "_LR_" + str(optimizer.state_dict()['param_groups'][0]['lr'])
-    wd_str = "_WD_" + str(optimizer.state_dict()['param_groups'][0]['weight_decay'])
-    threshold_str = f"_Threshold_{threshold: .2f}"
-    stats_base_file_name = dir_name + mode_str + lr_str + wd_str + threshold_str
+    if save_folder is None:
+        mode_str = "Fine_tune" if pre_trained else "Train"
+        lr_str = "_LR_" + str(optimizer.state_dict()['param_groups'][0]['lr'])
+        wd_str = "_WD_" + str(optimizer.state_dict()['param_groups'][0]['weight_decay'])
+        pls_str = f"_PLS_{positive_label_smoothing}"
+        stats_folder = f"{dir_name}/{mode_str}{lr_str}{wd_str}{pls_str}"
 
-    text_file = stats_base_file_name + ".txt"
-    if not os.path.exists(text_file) or delete_old_measurements:
-        stats_file = open(text_file, "w", encoding="utf-8")
+    else:
+        stats_folder = f"{dir_name}/{save_folder}"
+
+    os.makedirs(stats_folder, exist_ok=True)
+
+    stats_file_path = stats_folder + '/stats.txt'
+    if not os.path.exists(stats_file_path) or delete_old_measurements:
+        stats_file = open(stats_file_path, "w", encoding="utf-8")
         stats_file.write(str(net) + "\n\n")
     else:
-        stats_file = open(text_file, "a", encoding="utf-8")
+        stats_file = open(stats_file_path, "a", encoding="utf-8")
         stats_file.write("\n")
 
     start_time = time.time()
@@ -198,12 +235,14 @@ def train(net, spectrogram_model: bool, fine_tune: bool, pre_trained: bool, lr, 
     for epoch in range(num_epochs):
         current_time = datetime.datetime.now()
         epoch_start_time = time.time()
-        epoch_string = f"{current_time.strftime("%H:%M:%S")} Epoch {epoch + 1}"
-        print(f"{current_time.strftime("%H:%M:%S")} Epoch {epoch + 1}")
+        epoch_string = f"{current_time.strftime('%H:%M:%S')} Epoch {epoch + 1}"
+        print(f"{current_time.strftime('%H:%M:%S')} Epoch {epoch + 1}")
         stats_file.write(epoch_string + "\n")
 
         train_loss, train_f1, train_precision, train_recall = train_epoch_amp(
-            net, train_iter, loss, spectrogram_transform, augment_pipeline, optimizer, scaler, f1_metric, precision_metric, recall_metric, device
+            net, train_iter, loss, positive_label_smoothing,
+            spectrogram_transform, augment_pipeline, optimizer, add_noise,
+            f1_metric, precision_metric, recall_metric, device
         )
         train_loss_all.append(train_loss)
         train_f1_all.append(train_f1)
@@ -257,7 +296,7 @@ def train(net, spectrogram_model: bool, fine_tune: bool, pre_trained: bool, lr, 
     stats_file.close()
 
     if save_json:
-        with open(stats_base_file_name + ".json", "w", encoding="utf-8") as json_file:
+        with open(stats_folder + "/all_measurements.json", "w", encoding="utf-8") as json_file:
             history = {
                 "num_params": sum(p.numel() for p in net.parameters()),
                 "training_time": end_time - start_time,
@@ -273,7 +312,10 @@ def train(net, spectrogram_model: bool, fine_tune: bool, pre_trained: bool, lr, 
             json.dump(history, json_file, indent=4)
 
     if save_weights:
-        torch.save(best_weights, stats_base_file_name + ".pth")
+        torch.save(best_weights, stats_folder + "/weights.pth")
+
+    if best_weights is not None:
+        net.load_state_dict(best_weights)
 
     return train_loss_all, train_f1_all, val_loss_all, val_f1_all
 

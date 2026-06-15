@@ -1,3 +1,4 @@
+import torch
 from torchinfo import summary
 from torch import nn
 from abc import ABC
@@ -59,7 +60,7 @@ def resnet_block(input_channels, num_channels, num_residuals, first_block=False)
     return blk
 
 class ResNet18(CustomSpectrogramModel):
-    def __init__(self):
+    def __init__(self, dropout: float = 0.5):
         super(ResNet18, self).__init__()
 
         b1 = nn.Sequential(nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3), # 64x64x251
@@ -72,7 +73,11 @@ class ResNet18(CustomSpectrogramModel):
 
         self._net = nn.Sequential(b1, b2, b3, b4, b5,
                             nn.AdaptiveAvgPool2d((1, 1)),
+                            nn.Dropout(p=dropout),
                             nn.Flatten(), nn.Linear(512, NUM_CLASSES))
+
+    def load_weights(self, weights_path: str):
+        self.load_state_dict(torch.load(weights_path, weights_only=True))
 
 if __name__ == '__main__':
     net = ResNet18()
