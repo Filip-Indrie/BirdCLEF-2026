@@ -1,3 +1,4 @@
+import random
 import time
 import datetime
 import os
@@ -35,7 +36,7 @@ def wave_to_spectrogram(waveform, spectrogram_transform):
     return spectrogram_transform(waveform)
 
 def add_noise_to_wave(device, wave, min_amplitude=0.001, max_amplitude=0.015, p=0.5):
-    if torch.rand(1).item() > p:
+    if random.random() > p:
         return wave
 
     noise_level = torch.empty(1).uniform_(min_amplitude, max_amplitude).to(device)

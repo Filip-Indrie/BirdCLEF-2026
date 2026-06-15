@@ -51,5 +51,5 @@ if __name__ == '__main__':
             print('ERROR!')
             f.write(str(e))
     finally:
-        os.system("shutdown /s /t 5")
+        # os.system("shutdown /s /t 5")
         pass

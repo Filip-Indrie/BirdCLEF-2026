@@ -105,8 +105,14 @@ def get_single_bird_dataloader(device, batch_size, train_split=0.8, pos_weights_
     train_dataset = Subset(dataset, train_indices)
     val_dataset = Subset(dataset, val_indices)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=7)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=7)
+    train_loader = DataLoader(
+        train_dataset, batch_size=batch_size, shuffle=True,
+        num_workers=7, pin_memory=True, prefetch_factor=2
+    )
+    val_loader = DataLoader(
+        val_dataset, batch_size=batch_size, shuffle=False,
+        num_workers=7, pin_memory=True, prefetch_factor=2
+    )
 
     return train_loader, val_loader, train_pos_weights
 
@@ -135,6 +141,13 @@ class SoundscapesDataset(Dataset):
         self.df = pd.concat([df_scientists, df_machines_merged], ignore_index=True).reset_index(drop=True)
         self.classes = pd.read_csv(f"{DATASET_FOLDER}/taxonomy.csv")["primary_label"]
 
+        def create_multi_hot(label_string):
+            labels = label_string.split(";")
+            labels_multi_hot_list = list(map(int, list(self.classes.isin(labels))))
+            return torch.tensor(labels_multi_hot_list, dtype=torch.float32)
+
+        self.precomputed_labels = self.df["primary_label"].apply(create_multi_hot).tolist()
+
     def __len__(self):
         return len(self.df)
 
@@ -150,9 +163,7 @@ class SoundscapesDataset(Dataset):
 
         ret = get_waveform(path, start=start_frame)
 
-        labels = row["primary_label"].split(";")
-        labels_multi_hot_list = list(map(int, list(self.classes.isin(labels))))
-        labels_multi_hot = torch.tensor(labels_multi_hot_list, dtype=torch.float32)
+        labels_multi_hot = self.precomputed_labels[idx]
 
         return ret, labels_multi_hot
 
@@ -229,11 +240,20 @@ def get_soundscapes_dataloader(
             replacement=True,
             num_samples=train_samples_per_epoch
         )
-        train_loader = DataLoader(train_dataset, batch_size=batch_size, sampler=train_sampler, num_workers=7)
+        train_loader = DataLoader(
+            train_dataset, batch_size=batch_size, sampler=train_sampler,
+            num_workers=7, pin_memory=True, prefetch_factor=2
+        )
     else:
-        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=7)
+        train_loader = DataLoader(
+            train_dataset, batch_size=batch_size, shuffle=True,
+            num_workers=7, pin_memory=True, prefetch_factor=2
+        )
 
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=7)
+    val_loader = DataLoader(
+        val_dataset, batch_size=batch_size, shuffle=False,
+        num_workers=7, pin_memory=True, prefetch_factor=2
+    )
 
     return train_loader, val_loader, train_pos_weights
 
