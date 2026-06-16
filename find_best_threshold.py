@@ -74,7 +74,7 @@ if __name__ == "__main__":
     _device = try_gpu()
 
     model = ResNet18()
-    weights_path = "./Measurements/ResNet18/First Full Training Loop (Soundscapes)/weights.pth"
+    weights_path = "./Measurements/ResNet18/Single Bird Training (OneCycleLR)/weights.pth"
     state_dict = torch.load(weights_path, weights_only=True)
     model.load_state_dict(state_dict)
     model.to(_device)
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     batch_size = 256
 
-    _, val_loader, _ = get_soundscapes_dataloader(_device, 256)
+    _, val_loader, _ = get_single_bird_dataloader(_device, 256)
 
     results = {
         "thresholds": [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95],

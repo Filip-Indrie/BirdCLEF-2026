@@ -12,8 +12,6 @@ from torch.utils.data import DataLoader, Subset, Dataset, RandomSampler
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
-from train_utils import try_gpu
-
 load_dotenv()
 TARGET_SAMPLE_RATE = int(os.getenv("TARGET_SAMPLE_RATE"))
 TARGET_SECONDS = int(os.getenv("TARGET_SECONDS"))
@@ -287,8 +285,14 @@ def visualize_spectrogram(spectrogram):
     plt.axis('off')
     plt.show()
 
+def __try_gpu(i=0):
+    """Return gpu(i) if exists, otherwise return cpu()."""
+    if torch.cuda.device_count() >= i + 1:
+        return torch.device(f'cuda:{i}')
+    return torch.device('cpu')
+
 if __name__ == "__main__":
-    _device = try_gpu()
+    _device = __try_gpu()
 
     # 28480 train samples | 7168 test samples
     train_iter, val_iter, _train_pos_weights = get_single_bird_dataloader(_device, batch_size=64, train_split=0.8)

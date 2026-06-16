@@ -5,14 +5,14 @@ from spectrogram_models import *
 if __name__ == '__main__':
     nets = [
         # model, weights_file
-        (ResNet18(), "./Measurements/ResNet18/Train_LR_0.003_WD_0.01_PLS_0.1/weights.pth"),
+        (ResNet18(), "./Measurements/ResNet18/Single Bird Training (OneCycleLR)/weights.pth"),
     ]
 
     batch_size = 256
     num_epochs = 50
     patience = 10
 
-    lr = 1e-4
+    lr = 5e-5
     weight_decay = 0.01
     threshold = 0.7
     positive_label_smoothing = 0.1
@@ -30,7 +30,8 @@ if __name__ == '__main__':
             train_model(
                 device, net, True, True,
                 lr, weight_decay, positive_label_smoothing, threshold, False,
-                train_iter, val_iter, train_pos_weights, 2, patience, save_weights=False # REMINDER: SET TO TRUE WHEN FULLY TRAINING
+                train_iter, val_iter, train_pos_weights, num_epochs, patience, save_weights=True, # REMINDER: SET TO TRUE WHEN FULLY TRAINING
+                save_folder="Soundscapes Training (OneCycleLR)"
             )
     except Exception as e:
         with open("error.txt", "w") as f:

@@ -15,7 +15,7 @@ if __name__ == '__main__':
     patience_train = 15
     lr_train = 5e-3
     weight_decay_train = 0.01
-    threshold_train = 0.85
+    threshold_train = 0.7
 
     num_epochs_fine_tune = 50
     patience_fine_tune = 10
