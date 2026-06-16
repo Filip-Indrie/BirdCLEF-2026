@@ -210,7 +210,7 @@ def train_model(
         net.apply(init_weights)
     net.to(device)
 
-    optimizer = torch.optim.AdamW(net.parameters(), lr=lr, weight_decay=weight_decay)
+    optimizer = torch.optim.AdamW(filter(lambda p: p.requires_grad, net.parameters()), lr=lr, weight_decay=weight_decay)
     lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=lr, epochs=num_epochs, steps_per_epoch=len(train_iter))
 
     nocall_mixer = NocallMixer() if add_noise else None

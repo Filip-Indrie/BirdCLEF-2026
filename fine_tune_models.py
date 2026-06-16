@@ -9,13 +9,17 @@ if __name__ == '__main__':
     ]
 
     batch_size = 256
-    num_epochs = 50
     patience = 10
 
-    lr = 5e-5
     weight_decay = 0.01
     threshold = 0.7
     positive_label_smoothing = 0.1
+
+    num_epochs_all = 40
+    lr_all = 5e-5
+
+    num_epochs_head = 10
+    lr_head = 1e-3
 
     device = try_gpu()
 
@@ -27,12 +31,27 @@ if __name__ == '__main__':
         for net, weights_path in nets:
             if weights_path is not None:
                 net.load_weights(weights_path)
+
+            net.backbone_grad(False)
+
             train_model(
                 device, net, True, True,
-                lr, weight_decay, positive_label_smoothing, threshold, False,
-                train_iter, val_iter, train_pos_weights, num_epochs, patience, save_weights=True, # REMINDER: SET TO TRUE WHEN FULLY TRAINING
-                save_folder="Soundscapes Training (OneCycleLR)"
+                lr_head, weight_decay, positive_label_smoothing, threshold, False,
+                train_iter, val_iter, train_pos_weights, num_epochs_head, num_epochs_head + 1,
+                save_weights=False,
+                save_folder="Soundscapes HEAD Fine-Tune (OneCycleLR)"
             )
+
+            net.backbone_grad(True)
+
+            train_model(
+                device, net, True, True,
+                lr_all, weight_decay, positive_label_smoothing, threshold, False,
+                train_iter, val_iter, train_pos_weights, num_epochs_all, patience,
+                save_weights=True, # REMINDER: SET TO TRUE WHEN FULLY TRAINING
+                save_folder="Soundscapes ALL Fine-Tune (OneCycleLR)"
+            )
+
     except Exception as e:
         with open("error.txt", "w") as f:
             print('ERROR!')

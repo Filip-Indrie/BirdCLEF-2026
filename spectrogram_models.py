@@ -79,6 +79,13 @@ class ResNet18(CustomSpectrogramModel):
     def load_weights(self, weights_path: str):
         self.load_state_dict(torch.load(weights_path, weights_only=True))
 
+    def backbone_grad(self, backbone_requires_grad: bool):
+        for param in self.parameters():
+            param.requires_grad = backbone_requires_grad
+        if not backbone_requires_grad:
+            for param in net._net[8].parameters():
+                param.requires_grad = True
+
 if __name__ == '__main__':
     net = ResNet18()
     print(net)
