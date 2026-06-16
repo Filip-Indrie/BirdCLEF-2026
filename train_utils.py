@@ -10,6 +10,7 @@ import tqdm
 import json
 import copy
 from torchaudio.transforms import MelSpectrogram, AmplitudeToDB, TimeMasking, FrequencyMasking
+from load_utils import NocallMixer
 
 load_dotenv()
 NUM_CLASSES = int(os.getenv("NUM_CLASSES"))
@@ -35,13 +36,15 @@ def wave_to_spectrogram(waveform, spectrogram_transform):
     """
     return spectrogram_transform(waveform)
 
-def add_noise_to_wave(device, wave, min_amplitude=0.001, max_amplitude=0.015, p=0.5):
+def add_noise_to_wave(device, wave, nocall_mixer, p=0.5):
     if random.random() > p:
         return wave
 
-    noise_level = torch.empty(1).uniform_(min_amplitude, max_amplitude).to(device)
-    noise = torch.randn_like(wave) * noise_level
-    return torch.clamp(wave + noise, min=-1.0, max=1.0)
+    nocall_wave = nocall_mixer.load_random_chunk()
+    nocall_wave = nocall_wave.to(device)
+    noise_weight = random.uniform(0.1, 0.5)
+    mixed_wave = wave + (nocall_wave * noise_weight)
+    return torch.clamp(mixed_wave, min=-1.0, max=1.0)
 
 def evaluate_accuracy(
         net, data_iter, loss, spectrogram_transform,
@@ -85,7 +88,7 @@ def evaluate_accuracy(
 
 def train_epoch_amp(
         net, train_iter, loss, positive_label_smoothing: float,
-        spectrogram_transform, augment_pipeline, optimizer, add_noise: bool,
+        spectrogram_transform, augment_pipeline, optimizer, nocall_mixer,
         f1_metric, precision_metric, recall_metric, device
 ):
     # Uses automatic mixed precision
@@ -99,7 +102,7 @@ def train_epoch_amp(
     for wave, labels in training_loop:
         wave, labels = wave.to(device), labels.to(device)
 
-        if add_noise: wave = add_noise_to_wave(device, wave)
+        if nocall_mixer is not None: wave = add_noise_to_wave(device, wave, nocall_mixer)
 
         with torch.no_grad():
             if spectrogram_transform is not None:
@@ -208,6 +211,8 @@ def train_model(
     optimizer = torch.optim.AdamW(net.parameters(), lr=lr, weight_decay=weight_decay)
     lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=patience // 3)
 
+    nocall_mixer = NocallMixer() if add_noise else None
+
     net_name = type(net).__name__
     dir_name = "Measurements/" + net_name
 
@@ -242,7 +247,7 @@ def train_model(
 
         train_loss, train_f1, train_precision, train_recall = train_epoch_amp(
             net, train_iter, loss, positive_label_smoothing,
-            spectrogram_transform, augment_pipeline, optimizer, add_noise,
+            spectrogram_transform, augment_pipeline, optimizer, nocall_mixer,
             f1_metric, precision_metric, recall_metric, device
         )
         train_loss_all.append(train_loss)

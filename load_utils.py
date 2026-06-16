@@ -22,7 +22,7 @@ NUM_CLASSES = int(os.getenv("NUM_CLASSES"))
 RANDOM_SEED = int(os.getenv("RANDOM_SEED"))
 DATASET_FOLDER = os.getenv("DATASET_FOLDER")
 
-__all__ = ["get_soundscapes_dataloader", "get_single_bird_dataloader"]
+__all__ = ["get_soundscapes_dataloader", "get_single_bird_dataloader", "NocallMixer"]
 
 def get_waveform(path: str, start: int | None = None):
     """
@@ -259,6 +259,27 @@ def get_soundscapes_dataloader(
     )
 
     return train_loader, val_loader, train_pos_weights
+
+class NocallMixer:
+    def __init__(self, cache_size = 500):
+        df_birdnet = pd.read_csv(f"{DATASET_FOLDER}/birdnet_predicted_labels.csv")
+        df_perch = pd.read_csv(f"{DATASET_FOLDER}/perch_predicted_labels.csv")
+        df_machines = pd.concat([df_birdnet, df_perch])
+
+        nocall_df = df_machines[df_machines['primary_label'] == 'nocall'].reset_index(drop=True)
+
+        self.cached_waves = []
+        sample_df = nocall_df.sample(n=min(cache_size, len(nocall_df)))
+        for _, row in sample_df.iterrows():
+            file_name = row["filename"]
+            start_sec = int(row["start"].split(":")[2])
+            start_frame = start_sec * TARGET_SAMPLE_RATE
+            path = f"{DATASET_FOLDER}/train_soundscapes/{file_name}"
+            wave = get_waveform(path, start=start_frame)
+            self.cached_waves.append(wave)
+
+    def load_random_chunk(self):
+        return random.choice(self.cached_waves)
 
 def visualize_spectrogram(spectrogram):
     plt.figure(figsize=5)
