@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
     num_epochs_train = 100
     patience_train = 15
-    lr_train = 3e-3
+    lr_train = 5e-3
     weight_decay_train = 0.01
     threshold_train = 0.85
 

@@ -88,7 +88,7 @@ def evaluate_accuracy(
 
 def train_epoch_amp(
         net, train_iter, loss, positive_label_smoothing: float,
-        spectrogram_transform, augment_pipeline, optimizer, nocall_mixer,
+        spectrogram_transform, augment_pipeline, optimizer, lr_scheduler, nocall_mixer,
         f1_metric, precision_metric, recall_metric, device
 ):
     # Uses automatic mixed precision
@@ -126,6 +126,8 @@ def train_epoch_amp(
         torch.nn.utils.clip_grad_norm_(net.parameters(), max_norm=2.0)
 
         optimizer.step()
+        if lr_scheduler is not None:
+            lr_scheduler.step()
 
         with torch.no_grad():
             total_loss += float(l)
@@ -209,7 +211,7 @@ def train_model(
     net.to(device)
 
     optimizer = torch.optim.AdamW(net.parameters(), lr=lr, weight_decay=weight_decay)
-    lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=patience // 3)
+    lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=lr, epochs=num_epochs, steps_per_epoch=len(train_iter))
 
     nocall_mixer = NocallMixer() if add_noise else None
 
@@ -247,7 +249,7 @@ def train_model(
 
         train_loss, train_f1, train_precision, train_recall = train_epoch_amp(
             net, train_iter, loss, positive_label_smoothing,
-            spectrogram_transform, augment_pipeline, optimizer, nocall_mixer,
+            spectrogram_transform, augment_pipeline, optimizer, lr_scheduler, nocall_mixer,
             f1_metric, precision_metric, recall_metric, device
         )
         train_loss_all.append(train_loss)
@@ -263,9 +265,6 @@ def train_model(
         val_f1_all.append(val_f1)
         val_precision_all.append(val_precision)
         val_recall_all.append(val_recall)
-
-        # ONLY STEP SCHEDULER HERE IF USING `ReduceLROnPlateau`
-        lr_scheduler.step(val_loss)
 
         epoch_end_time = time.time()
         epoch_time = epoch_end_time - epoch_start_time

@@ -12,7 +12,7 @@ if __name__ == '__main__':
     num_epochs = 100
     patience = 15
 
-    lr = 3e-3
+    lr = 5e-3
     weight_decay = 0.01
     threshold = 0.85
     positive_label_smoothing = 0.1
