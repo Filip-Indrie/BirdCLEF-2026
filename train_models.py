@@ -26,7 +26,8 @@ if __name__ == '__main__':
             train_model(
                 device, net, True, False,
                 lr, weight_decay, positive_label_smoothing, threshold, True,
-                train_iter, val_iter, pos_weights, 2, patience, save_weights=False
+                train_iter, val_iter, pos_weights, num_epochs, patience, save_weights=True,
+                save_folder="Single Bird Training"
             )
     except Exception as e:
         with open("error.txt", "w") as f:
