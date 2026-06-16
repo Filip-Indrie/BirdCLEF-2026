@@ -19,14 +19,14 @@ if __name__ == '__main__':
 
     num_epochs_fine_tune = 50
     patience_fine_tune = 10
-    lr_fine_tune = 1e-4
+    lr_fine_tune = 1e-5
     weight_decay_fine_tune = 0.01
     threshold_fine_tune = 0.7
 
     device = try_gpu()
 
     train_iter_train, val_iter_train, pos_weights_train = get_single_bird_dataloader(device, batch_size, pos_weights_clamp_max=100)
-    train_iter_fine_tune, val_iter_fine_tune, pos_weights_fine_tune = get_soundscapes_dataloader(device, batch_size, pos_weights_clamp_max=25)
+    train_iter_fine_tune, val_iter_fine_tune, pos_weights_fine_tune = get_soundscapes_dataloader(device, batch_size, pos_weights_clamp_max=100)
 
     try:
         for net in nets:
