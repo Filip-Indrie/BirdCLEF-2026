@@ -1,10 +1,14 @@
+import os
+from dotenv import load_dotenv
 import torch
 from torchinfo import summary
 from torch import nn
 from abc import ABC
-from load_utils import NUM_CLASSES
 
 __all__ = ['ResNet18']
+
+load_dotenv()
+NUM_CLASSES = int(os.getenv('NUM_CLASSES'))
 
 class CustomSpectrogramModel(nn.Module, ABC):
     """
@@ -83,7 +87,7 @@ class ResNet18(CustomSpectrogramModel):
         for param in self.parameters():
             param.requires_grad = backbone_requires_grad
         if not backbone_requires_grad:
-            for param in net._net[8].parameters():
+            for param in self._net[8].parameters():
                 param.requires_grad = True
 
 if __name__ == '__main__':
