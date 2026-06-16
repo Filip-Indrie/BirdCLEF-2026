@@ -15,7 +15,7 @@ if __name__ == '__main__':
     lr = 5e-3
     weight_decay = 0.01
     threshold = 0.7
-    positive_label_smoothing = 0.1
+    positive_label_smoothing = 0 # CONFLICTS WITH FOCAL LOSS
 
     device = try_gpu()
 

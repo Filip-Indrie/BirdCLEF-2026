@@ -12,8 +12,8 @@ if __name__ == '__main__':
     patience = 10
 
     weight_decay = 0.01
-    threshold = 0.7
-    positive_label_smoothing = 0.1
+    threshold = 0.4
+    positive_label_smoothing = 0 # CONFLICTS WITH FOCAL LOSS
 
     num_epochs_all = 40
     lr_all = 5e-5
@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     train_iter, val_iter, train_pos_weights = get_soundscapes_dataloader(
         device, batch_size, train_split=0.8, train_samples_per_epoch=28500, validation_total_samples=7200,
-        pos_weights_clamp_max=25
+        pos_weights_clamp_max=400
     )
     try:
         for net, weights_path in nets:

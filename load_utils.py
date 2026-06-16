@@ -295,7 +295,7 @@ if __name__ == "__main__":
     _device = __try_gpu()
 
     # 28480 train samples | 7168 test samples
-    train_iter, val_iter, _train_pos_weights = get_single_bird_dataloader(_device, batch_size=64, train_split=0.8)
+    train_iter, val_iter, _train_pos_weights = get_soundscapes_dataloader(_device, batch_size=256, train_split=0.8)
 
     # train_iter, val_iter, _train_pos_weights = get_soundscapes_dataloader(
     #     _device, batch_size=64, train_split=0.8, train_samples_per_epoch=28500, validation_total_samples=7200
