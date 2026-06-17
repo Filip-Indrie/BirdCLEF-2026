@@ -5,9 +5,12 @@ from torchinfo import summary
 from torch import nn
 from abc import ABC
 
-from torchvision.models import efficientnet_b1, EfficientNet_B1_Weights
+from torchvision.models import (
+    efficientnet_b1, EfficientNet_B1_Weights,
+    inception_v3, Inception_V3_Weights
+)
 
-__all__ = ['ResNet18', 'EfficientNetB1']
+__all__ = ['ResNet18', 'EfficientNetB1', 'InceptionV3']
 
 load_dotenv()
 NUM_CLASSES = int(os.getenv('NUM_CLASSES'))
@@ -120,6 +123,38 @@ class EfficientNetB1(CustomSpectrogramModel):
             param.requires_grad = backbone_requires_grad
         if not backbone_requires_grad:
             for param in self._net.classifier.parameters():
+                param.requires_grad = True
+
+class InceptionV3(CustomSpectrogramModel):
+    def __init__(self, dropout: float = 0.5):
+        super(InceptionV3, self).__init__()
+
+        weights = Inception_V3_Weights.IMAGENET1K_V1
+
+        base_model = inception_v3(
+            weights=weights,
+            aux_logits=False,
+            transform_input=False
+        )
+
+        base_model.dropout.p = dropout
+
+        num_main_clf_in_features = int(base_model.fc.in_features)
+        base_model.fc = nn.Linear(num_main_clf_in_features, NUM_CLASSES)
+
+        self._net = base_model
+
+    def __str__(self):
+        return str(summary(self._net, input_size=(1, 3, 299, 299), verbose=0))
+
+    def load_weights(self, weights_path: str):
+        self.load_state_dict(torch.load(weights_path, weights_only=True))
+
+    def backbone_grad(self, backbone_requires_grad: bool):
+        for param in self.parameters():
+            param.requires_grad = backbone_requires_grad
+        if not backbone_requires_grad:
+            for param in self._net.fc.parameters():
                 param.requires_grad = True
 
 if __name__ == '__main__':

@@ -7,7 +7,8 @@ if __name__ == '__main__':
     nets = [
         # net, pre_trained, spectrogram_transform
         # (ResNet18(), False, None),
-        (EfficientNetB1(), True, get_spectrogram_transform(240, 240)),
+        # (EfficientNetB1(), True, get_spectrogram_transform(240, 240)),
+        (InceptionV3(), True, get_spectrogram_transform(299, 299))
     ]
 
     batch_size = 256
@@ -29,8 +30,8 @@ if __name__ == '__main__':
             train_model(
                 device, net, True, pre_trained, spectrogram_transform,
                 lr, weight_decay, positive_label_smoothing, threshold, True,
-                train_iter, val_iter, pos_weights, num_epochs, patience, save_weights=True, save_json=True,
-                save_folder="Training (240x240, lr=1e-5, wd=0.05)/Single Birds"
+                train_iter, val_iter, pos_weights, epochs, patience, save_weights=True, save_json=True,
+                save_folder="Training (299x299)/Single Birds"
             )
     except Exception as e:
         with open("error.txt", "w") as f:

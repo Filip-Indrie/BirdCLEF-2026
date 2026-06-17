@@ -7,7 +7,8 @@ if __name__ == '__main__':
     nets = [
         # net, pretrained, spectrogram_transform
         # (ResNet18(), False, None),
-        (EfficientNetB1(), True, get_spectrogram_transform(240, 240)),
+        # (EfficientNetB1(), True, get_spectrogram_transform(240, 240)),
+        (InceptionV3(), True, get_spectrogram_transform(299, 299)),
     ]
 
     batch_size = 256
@@ -44,7 +45,7 @@ if __name__ == '__main__':
                 device, net, True, pre_trained, spectrogram_transform,
                 lr_train, weight_decay_train, positive_label_smoothing, threshold_train, True,
                 train_iter_train, val_iter_train, pos_weights_train,
-                num_epochs_train, patience_train, save_weights=True, save_json=True,
+                epochs_single_birds, patience_train, save_weights=True, save_json=True,
                 save_folder="3 Stage Training Loop (Single Birds)"
             )
 
