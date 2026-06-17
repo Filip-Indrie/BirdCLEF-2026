@@ -30,7 +30,8 @@ if __name__ == '__main__':
             train_model(
                 device, net, True, pre_trained, spectrogram_transform,
                 lr, weight_decay, positive_label_smoothing, threshold, True,
-                train_iter, val_iter, pos_weights, epochs, patience, save_weights=True, save_json=True,
+                train_iter, val_iter, pos_weights, epochs, patience, 30, 15,
+                save_weights=True, save_json=True,
                 save_folder="Training (299x299)/Single Birds"
             )
     except Exception as e:

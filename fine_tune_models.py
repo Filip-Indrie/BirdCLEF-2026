@@ -39,7 +39,7 @@ if __name__ == '__main__':
             train_model(
                 device, net, True, True, spectrogram_transform,
                 lr_head, weight_decay, positive_label_smoothing, threshold, False,
-                train_iter, val_iter, train_pos_weights, num_epochs_head, num_epochs_head + 1,
+                train_iter, val_iter, train_pos_weights, num_epochs_head, num_epochs_head + 1, 15, 8,
                 save_weights=False,
                 save_folder="Training (299x299)/Soundscapes HEAD Fine-Tune"
             )
@@ -49,7 +49,7 @@ if __name__ == '__main__':
             train_model(
                 device, net, True, True, spectrogram_transform,
                 lr_all, weight_decay, positive_label_smoothing, threshold, False,
-                train_iter, val_iter, train_pos_weights, num_epochs_all, patience,
+                train_iter, val_iter, train_pos_weights, num_epochs_all, patience, 15, 8,
                 save_weights=True, # REMINDER: SET TO TRUE WHEN FULLY TRAINING,
                 save_json=True,
                 save_folder="Training (299x299)/Soundscapes ALL Fine-Tune"

@@ -45,7 +45,8 @@ if __name__ == '__main__':
                 device, net, True, pre_trained, spectrogram_transform,
                 lr_train, weight_decay_train, positive_label_smoothing, threshold_train, True,
                 train_iter_train, val_iter_train, pos_weights_train,
-                epochs_single_birds, patience_train, save_weights=True, save_json=True,
+                epochs_single_birds, patience_train, 30, 15,
+                save_weights=True, save_json=True,
                 save_folder="3 Stage Training Loop (Single Birds)"
             )
 
@@ -55,7 +56,8 @@ if __name__ == '__main__':
                 device, net, True, True, spectrogram_transform,
                 lr_fine_tune_head, weight_decay_fine_tune, positive_label_smoothing, threshold_fine_tune, False,
                 train_iter_fine_tune, val_iter_fine_tune, pos_weights_fine_tune,
-                num_epochs_fine_tune_head, num_epochs_fine_tune_head + 1, save_weights=False,
+                num_epochs_fine_tune_head, num_epochs_fine_tune_head + 1, 15, 8,
+                save_weights=False,
                 save_folder="3 Stage Training Loop (Soundscapes Head Fine-Tune)"
             )
 
@@ -65,7 +67,8 @@ if __name__ == '__main__':
                 device, net, True, True, spectrogram_transform,
                 lr_fine_tune_all, weight_decay_fine_tune, positive_label_smoothing, threshold_fine_tune, False,
                 train_iter_fine_tune, val_iter_fine_tune, pos_weights_fine_tune,
-                num_epochs_fine_tune_all, patience_fine_tune, save_weights=True, save_json=True,
+                num_epochs_fine_tune_all, patience_fine_tune, 15, 8,
+                save_weights=True, save_json=True,
                 save_folder="3 Stage Training Loop (Soundscapes Backbone Fine-Tune)"
             )
 

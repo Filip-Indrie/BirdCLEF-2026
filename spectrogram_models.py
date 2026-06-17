@@ -133,9 +133,11 @@ class InceptionV3(CustomSpectrogramModel):
 
         base_model = inception_v3(
             weights=weights,
-            aux_logits=False,
             transform_input=False
         )
+
+        base_model.AuxLogits = None
+        base_model.aux_logits = False
 
         base_model.dropout.p = dropout
 

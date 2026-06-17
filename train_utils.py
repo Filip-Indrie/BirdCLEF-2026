@@ -120,7 +120,7 @@ def train_epoch_amp(
         with torch.no_grad():
             if spectrogram_transform is not None:
                 model_input = wave_to_spectrogram(wave, spectrogram_transform)
-                model_input = augment_pipeline(model_input)
+                if augment_pipeline is not None: model_input = augment_pipeline(model_input)
                 if reshape is not None: model_input = reshape(model_input)
             else:
                 model_input = wave
@@ -182,7 +182,7 @@ class MultiLabelFocalLoss(nn.Module):
 def train_model(
         device, net, spectrogram_model: bool, pre_trained: bool, reshape,
         lr, weight_decay, positive_label_smoothing: float, threshold: float, add_noise: bool,
-        train_iter, val_iter, pos_weights, num_epochs, patience,
+        train_iter, val_iter, pos_weights, num_epochs, patience, time_masking, freq_masking,
         delete_old_measurements: bool = False, save_json: bool = False, save_weights: bool = False,
         save_folder: str | None = None
 ):
@@ -201,10 +201,10 @@ def train_model(
 
     if spectrogram_model:
         spectrogram_transform = init_spectrogram(device)
-        augment_pipeline = nn.Sequential(
-            TimeMasking(time_mask_param=30),
-            FrequencyMasking(freq_mask_param=15)
-        ).to(device)
+        augments = []
+        if time_masking > 0: augments.append(TimeMasking(time_masking))
+        if freq_masking > 0: augments.append(FrequencyMasking(freq_masking))
+        augment_pipeline = nn.Sequential(*augments).to(device) if augments else None
     else:
         spectrogram_transform = None
         augment_pipeline = None
