@@ -9,6 +9,7 @@ from torch import nn
 import tqdm
 import json
 import copy
+from torchvision.transforms import v2
 from torchaudio.transforms import MelSpectrogram, AmplitudeToDB, TimeMasking, FrequencyMasking
 from load_utils import NocallMixer
 
@@ -16,7 +17,14 @@ load_dotenv()
 NUM_CLASSES = int(os.getenv("NUM_CLASSES"))
 TARGET_SAMPLE_RATE = int(os.getenv("TARGET_SAMPLE_RATE"))
 
-__all__ = ['train_model', 'try_gpu', 'wave_to_spectrogram']
+__all__ = ['train_model', 'try_gpu', 'wave_to_spectrogram', 'get_spectrogram_transform']
+
+def get_spectrogram_transform(size1: int, size2: int):
+    return v2.Compose([
+        v2.Resize((size1, size2), antialias=True),
+        v2.Lambda(lambda x: torch.cat([x, x, x], dim=1)),
+        v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
 
 def init_weights(layer):
     if type(layer) == nn.Linear or type(layer) == nn.Conv2d:
@@ -48,7 +56,7 @@ def add_noise_to_wave(device, wave, nocall_mixer, p=0.5):
     return (wave * (1.0 - noise_weight)) + (nocall_wave * noise_weight)
 
 def evaluate_accuracy(
-        net, data_iter, loss, spectrogram_transform,
+        net, data_iter, loss, spectrogram_transform, reshape,
         f1_metric, precision_metric, recall_metric, device
 ):
     """Compute the accuracy for a model on a dataset."""
@@ -62,7 +70,11 @@ def evaluate_accuracy(
         for wave, labels in validation_loop:
             wave, labels = wave.to(device), labels.to(device)
 
-            model_input = wave if spectrogram_transform is None else wave_to_spectrogram(wave, spectrogram_transform)
+            if spectrogram_transform is not None:
+                model_input = wave_to_spectrogram(wave, spectrogram_transform)
+                if reshape is not None: model_input = reshape(model_input)
+            else:
+                model_input = wave
 
             with torch.amp.autocast("cuda", dtype=torch.bfloat16):
                 logits = net(model_input)
@@ -89,7 +101,7 @@ def evaluate_accuracy(
 
 def train_epoch_amp(
         net, train_iter, loss, positive_label_smoothing: float,
-        spectrogram_transform, augment_pipeline, optimizer, lr_scheduler, nocall_mixer,
+        spectrogram_transform, augment_pipeline, reshape, optimizer, lr_scheduler, nocall_mixer,
         f1_metric, precision_metric, recall_metric, device
 ):
     # Uses automatic mixed precision
@@ -109,6 +121,7 @@ def train_epoch_amp(
             if spectrogram_transform is not None:
                 model_input = wave_to_spectrogram(wave, spectrogram_transform)
                 model_input = augment_pipeline(model_input)
+                if reshape is not None: model_input = reshape(model_input)
             else:
                 model_input = wave
 
@@ -167,7 +180,7 @@ class MultiLabelFocalLoss(nn.Module):
         return loss.mean()
 
 def train_model(
-        device, net, spectrogram_model: bool, pre_trained: bool,
+        device, net, spectrogram_model: bool, pre_trained: bool, reshape,
         lr, weight_decay, positive_label_smoothing: float, threshold: float, add_noise: bool,
         train_iter, val_iter, pos_weights, num_epochs, patience,
         delete_old_measurements: bool = False, save_json: bool = False, save_weights: bool = False,
@@ -250,7 +263,7 @@ def train_model(
 
         train_loss, train_f1, train_precision, train_recall = train_epoch_amp(
             net, train_iter, loss, positive_label_smoothing,
-            spectrogram_transform, augment_pipeline, optimizer, lr_scheduler, nocall_mixer,
+            spectrogram_transform, augment_pipeline, reshape, optimizer, lr_scheduler, nocall_mixer,
             f1_metric, precision_metric, recall_metric, device
         )
         train_loss_all.append(train_loss)
@@ -259,7 +272,7 @@ def train_model(
         train_recall_all.append(train_recall)
 
         val_loss, val_f1, val_precision, val_recall = evaluate_accuracy(
-            net, val_iter, loss, spectrogram_transform, f1_metric, precision_metric, recall_metric, device
+            net, val_iter, loss, spectrogram_transform, reshape, f1_metric, precision_metric, recall_metric, device
         )
 
         val_loss_all.append(val_loss)

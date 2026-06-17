@@ -5,7 +5,9 @@ from torchinfo import summary
 from torch import nn
 from abc import ABC
 
-__all__ = ['ResNet18']
+from torchvision.models import efficientnet_b1, EfficientNet_B1_Weights
+
+__all__ = ['ResNet18', 'EfficientNetB1']
 
 load_dotenv()
 NUM_CLASSES = int(os.getenv('NUM_CLASSES'))
@@ -88,6 +90,33 @@ class ResNet18(CustomSpectrogramModel):
             param.requires_grad = backbone_requires_grad
         if not backbone_requires_grad:
             for param in self._net[8].parameters():
+                param.requires_grad = True
+
+class EfficientNetB1(CustomSpectrogramModel):
+    def __init__(self, dropout: float = 0.5):
+        super(EfficientNetB1, self).__init__()
+
+        weights = EfficientNet_B1_Weights.IMAGENET1K_V2
+
+        base_model = efficientnet_b1(weights=weights)
+
+        num_clf_features = int(base_model.classifier[-1].in_features)
+
+        base_model.classifier = nn.Sequential(
+            nn.Dropout(p=dropout, inplace=True),
+            nn.Linear(num_clf_features, NUM_CLASSES),
+        )
+
+        self._net = base_model
+
+    def load_weights(self, weights_path: str):
+        self.load_state_dict(torch.load(weights_path, weights_only=True))
+
+    def backbone_grad(self, backbone_requires_grad: bool):
+        for param in self.parameters():
+            param.requires_grad = backbone_requires_grad
+        if not backbone_requires_grad:
+            for param in self._net.classifier.parameters():
                 param.requires_grad = True
 
 if __name__ == '__main__':

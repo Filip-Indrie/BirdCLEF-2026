@@ -5,7 +5,10 @@ import os
 
 if __name__ == '__main__':
     nets = [
-        ResNet18(),
+        # net, pretrained, spectrogram_transform
+        # (ResNet18(), False, None),
+        (EfficientNetB1(), True, get_spectrogram_transform(240, 240)),
+        # (EfficientNetB1(), True, get_spectrogram_transform(240, 940)),
     ]
 
     batch_size = 256
@@ -36,12 +39,12 @@ if __name__ == '__main__':
     )
 
     try:
-        for net in nets:
+        for net, pre_trained, spectrogram_transform in nets:
             train_model(
-                device, net, True, False,
+                device, net, True, pre_trained,
                 lr_train, weight_decay_train, positive_label_smoothing, threshold_train, True,
                 train_iter_train, val_iter_train, pos_weights_train,
-                num_epochs_train, patience_train, save_weights=True,
+                num_epochs_train, patience_train, save_weights=True, save_json=True,
                 save_folder="3 Stage Training Loop (Single Birds)"
             )
 
@@ -61,7 +64,7 @@ if __name__ == '__main__':
                 device, net, True, True,
                 lr_fine_tune_all, weight_decay_fine_tune, positive_label_smoothing, threshold_fine_tune, False,
                 train_iter_fine_tune, val_iter_fine_tune, pos_weights_fine_tune,
-                num_epochs_fine_tune_all, patience_fine_tune, save_weights=True,
+                num_epochs_fine_tune_all, patience_fine_tune, save_weights=True, save_json=True,
                 save_folder="3 Stage Training Loop (Soundscapes Backbone Fine-Tune)"
             )
 

@@ -4,8 +4,10 @@ from spectrogram_models import *
 
 if __name__ == '__main__':
     nets = [
-        # model, weights_file
-        (ResNet18(), "./Measurements/ResNet18/Single Bird Training (OneCycleLR)/weights.pth"),
+        # model, weights_file, spectrogram_transform
+        # (ResNet18(), "./Measurements/ResNet18/Single Bird Training (OneCycleLR)/weights.pth"),
+        (EfficientNetB1(), None, get_spectrogram_transform(240, 240)),
+        # (EfficientNetB1(), None, get_spectrogram_transform(240, 940)),
     ]
 
     batch_size = 256
@@ -28,14 +30,14 @@ if __name__ == '__main__':
         pos_weights_clamp_max=1
     )
     try:
-        for net, weights_path in nets:
+        for net, weights_path, spectrogram_transform in nets:
             if weights_path is not None:
-                net.load_weights(weights_path)
+                net.load_weights(weights_path) # type: ignore
 
             net.backbone_grad(False)
 
             train_model(
-                device, net, True, True,
+                device, net, True, True, spectrogram_transform,
                 lr_head, weight_decay, positive_label_smoothing, threshold, False,
                 train_iter, val_iter, train_pos_weights, num_epochs_head, num_epochs_head + 1,
                 save_weights=False,
@@ -45,10 +47,11 @@ if __name__ == '__main__':
             net.backbone_grad(True)
 
             train_model(
-                device, net, True, True,
+                device, net, True, True, spectrogram_transform,
                 lr_all, weight_decay, positive_label_smoothing, threshold, False,
                 train_iter, val_iter, train_pos_weights, num_epochs_all, patience,
-                save_weights=True, # REMINDER: SET TO TRUE WHEN FULLY TRAINING
+                save_weights=True, # REMINDER: SET TO TRUE WHEN FULLY TRAINING,
+                save_json=True,
                 save_folder="NoDataBalancing_clamp10/Soundscapes ALL Fine-Tune"
             )
 
