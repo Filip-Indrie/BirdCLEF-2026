@@ -4,6 +4,7 @@ import tqdm
 import json
 import os
 from dotenv import load_dotenv
+from matplotlib.font_manager import weight_dict
 from torchaudio.transforms import MelSpectrogram, AmplitudeToDB
 from matplotlib import pyplot as plt
 
@@ -65,7 +66,8 @@ if __name__ == "__main__":
     _device = try_gpu()
 
     model = ResNet18()
-    weights_path = "./Measurements/ResNet18/Single Bird Training (OneCycleLR)/weights.pth" # 0.51 la 0.7 threshold
+    # weights_path = "./Measurements/ResNet18/Single Bird Training (OneCycleLR)/weights.pth" # 0.51 la 0.7 threshold
+    weights_path = "./Measurements/ResNet18/POS_WEIGHT_CLAMP_10/Soundscapes ALL Fine-Tune/weights.pth"
     state_dict = torch.load(weights_path, weights_only=True)
     model.load_state_dict(state_dict)
     model.to(_device)
@@ -75,7 +77,7 @@ if __name__ == "__main__":
 
     batch_size = 256
 
-    _, val_loader, _ = get_single_bird_dataloader(_device, batch_size)
+    _, val_loader, _ = get_soundscapes_dataloader(_device, batch_size)
 
     _probs, _labels = evaluate_model(model, val_loader, _spectrogram_transform, _device)
 

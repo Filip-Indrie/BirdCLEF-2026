@@ -214,11 +214,12 @@ def get_soundscapes_dataloader(
     bird_indices = train_df[train_df['primary_label'] != 'nocall'].index.tolist()
     nocall_indices = train_df[train_df['primary_label'] == 'nocall'].index.tolist()
 
-    target_nocall_count = len(bird_indices) * 2
-
-    if len(nocall_indices) > target_nocall_count:
-        np.random.seed(RANDOM_SEED)
-        nocall_indices = np.random.choice(nocall_indices, size=target_nocall_count, replace=False).tolist()
+    # NO MORE DATA BALANCING
+    # target_nocall_count = len(bird_indices) * 2
+    #
+    # if len(nocall_indices) > target_nocall_count:
+    #     np.random.seed(RANDOM_SEED)
+    #     nocall_indices = np.random.choice(nocall_indices, size=target_nocall_count, replace=False).tolist()
 
     balanced_train_indices = bird_indices + nocall_indices
 
