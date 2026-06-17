@@ -12,7 +12,7 @@ if __name__ == '__main__':
     patience = 10
 
     weight_decay = 0.01
-    threshold = 0.4
+    threshold = 0.5
     positive_label_smoothing = 0.1
 
     num_epochs_all = 40
@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     train_iter, val_iter, train_pos_weights = get_soundscapes_dataloader(
         device, batch_size, train_split=0.8, train_samples_per_epoch=28500, validation_total_samples=7200,
-        pos_weights_clamp_max=100
+        pos_weights_clamp_max=10
     )
     try:
         for net, weights_path in nets:
@@ -39,7 +39,7 @@ if __name__ == '__main__':
                 lr_head, weight_decay, positive_label_smoothing, threshold, False,
                 train_iter, val_iter, train_pos_weights, num_epochs_head, num_epochs_head + 1,
                 save_weights=False,
-                save_folder="Soundscapes HEAD Fine-Tune (modified noise addition)"
+                save_folder="POS_WEIGHT_CLAMP_10/Soundscapes HEAD Fine-Tune"
             )
 
             net.backbone_grad(True)
@@ -49,7 +49,7 @@ if __name__ == '__main__':
                 lr_all, weight_decay, positive_label_smoothing, threshold, False,
                 train_iter, val_iter, train_pos_weights, num_epochs_all, patience,
                 save_weights=True, # REMINDER: SET TO TRUE WHEN FULLY TRAINING
-                save_folder="Soundscapes ALL Fine-Tune (modified noise addition)"
+                save_folder="POS_WEIGHT_CLAMP_10/Soundscapes ALL Fine-Tune"
             )
 
     except Exception as e:

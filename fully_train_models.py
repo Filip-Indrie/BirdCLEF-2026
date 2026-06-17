@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     patience_fine_tune = 10
     weight_decay_fine_tune = 0.01
-    threshold_fine_tune = 0.4
+    threshold_fine_tune = 0.5
 
     num_epochs_fine_tune_all = 40
     lr_fine_tune_all = 5e-5
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     train_iter_train, val_iter_train, pos_weights_train = get_single_bird_dataloader(device, batch_size, pos_weights_clamp_max=100)
     train_iter_fine_tune, val_iter_fine_tune, pos_weights_fine_tune = get_soundscapes_dataloader(
         device, batch_size, train_split=0.8, train_samples_per_epoch=28500, validation_total_samples=7200,
-        pos_weights_clamp_max=100
+        pos_weights_clamp_max=10
     )
 
     try:
