@@ -9,7 +9,7 @@ if __name__ == '__main__':
     ]
 
     batch_size = 256
-    positive_label_smoothing = 0 # CONFLICTS WITH FOCAL LOSS
+    positive_label_smoothing = 0.1
 
     num_epochs_train = 100
     patience_train = 15
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     train_iter_train, val_iter_train, pos_weights_train = get_single_bird_dataloader(device, batch_size, pos_weights_clamp_max=100)
     train_iter_fine_tune, val_iter_fine_tune, pos_weights_fine_tune = get_soundscapes_dataloader(
         device, batch_size, train_split=0.8, train_samples_per_epoch=28500, validation_total_samples=7200,
-        pos_weights_clamp_max=400
+        pos_weights_clamp_max=100
     )
 
     try:

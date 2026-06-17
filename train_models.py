@@ -15,7 +15,7 @@ if __name__ == '__main__':
     lr = 5e-3
     weight_decay = 0.01
     threshold = 0.7
-    positive_label_smoothing = 0 # CONFLICTS WITH FOCAL LOSS
+    positive_label_smoothing = 0.1
 
     device = try_gpu()
 
@@ -27,7 +27,7 @@ if __name__ == '__main__':
                 device, net, True, False,
                 lr, weight_decay, positive_label_smoothing, threshold, True,
                 train_iter, val_iter, pos_weights, num_epochs, patience, save_weights=True,
-                save_folder="Single Bird Training"
+                save_folder="Single Bird Training (Focal loss, Label smoothing, Noise Introduction)"
             )
     except Exception as e:
         with open("error.txt", "w") as f:

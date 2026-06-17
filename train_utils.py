@@ -43,8 +43,9 @@ def add_noise_to_wave(device, wave, nocall_mixer, p=0.5):
     nocall_wave = nocall_mixer.load_random_chunk()
     nocall_wave = nocall_wave.to(device)
     noise_weight = random.uniform(0.1, 0.5)
-    mixed_wave = wave + (nocall_wave * noise_weight)
-    return torch.clamp(mixed_wave, min=-1.0, max=1.0)
+    # mixed_wave = wave + (nocall_wave * noise_weight)
+    # return torch.clamp(mixed_wave, min=-1.0, max=1.0)
+    return (wave * (1.0 - noise_weight)) + (nocall_wave * noise_weight)
 
 def evaluate_accuracy(
         net, data_iter, loss, spectrogram_transform,

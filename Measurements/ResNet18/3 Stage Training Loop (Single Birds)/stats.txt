@@ -1,0 +1,776 @@
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+Sequential                               [1, 234]                  --
+├─Sequential: 1-1                        [1, 64, 32, 126]          --
+│    └─Conv2d: 2-1                       [1, 64, 64, 251]          3,200
+│    └─BatchNorm2d: 2-2                  [1, 64, 64, 251]          128
+│    └─ReLU: 2-3                         [1, 64, 64, 251]          --
+│    └─MaxPool2d: 2-4                    [1, 64, 32, 126]          --
+├─Sequential: 1-2                        [1, 64, 32, 126]          --
+│    └─Residual: 2-5                     [1, 64, 32, 126]          --
+│    │    └─Conv2d: 3-1                  [1, 64, 32, 126]          36,928
+│    │    └─BatchNorm2d: 3-2             [1, 64, 32, 126]          128
+│    │    └─Conv2d: 3-3                  [1, 64, 32, 126]          36,928
+│    │    └─BatchNorm2d: 3-4             [1, 64, 32, 126]          128
+│    └─Residual: 2-6                     [1, 64, 32, 126]          --
+│    │    └─Conv2d: 3-5                  [1, 64, 32, 126]          36,928
+│    │    └─BatchNorm2d: 3-6             [1, 64, 32, 126]          128
+│    │    └─Conv2d: 3-7                  [1, 64, 32, 126]          36,928
+│    │    └─BatchNorm2d: 3-8             [1, 64, 32, 126]          128
+├─Sequential: 1-3                        [1, 128, 16, 63]          --
+│    └─Residual: 2-7                     [1, 128, 16, 63]          --
+│    │    └─Conv2d: 3-9                  [1, 128, 16, 63]          73,856
+│    │    └─BatchNorm2d: 3-10            [1, 128, 16, 63]          256
+│    │    └─Conv2d: 3-11                 [1, 128, 16, 63]          147,584
+│    │    └─BatchNorm2d: 3-12            [1, 128, 16, 63]          256
+│    │    └─Conv2d: 3-13                 [1, 128, 16, 63]          8,320
+│    │    └─BatchNorm2d: 3-14            [1, 128, 16, 63]          256
+│    └─Residual: 2-8                     [1, 128, 16, 63]          --
+│    │    └─Conv2d: 3-15                 [1, 128, 16, 63]          147,584
+│    │    └─BatchNorm2d: 3-16            [1, 128, 16, 63]          256
+│    │    └─Conv2d: 3-17                 [1, 128, 16, 63]          147,584
+│    │    └─BatchNorm2d: 3-18            [1, 128, 16, 63]          256
+├─Sequential: 1-4                        [1, 256, 8, 32]           --
+│    └─Residual: 2-9                     [1, 256, 8, 32]           --
+│    │    └─Conv2d: 3-19                 [1, 256, 8, 32]           295,168
+│    │    └─BatchNorm2d: 3-20            [1, 256, 8, 32]           512
+│    │    └─Conv2d: 3-21                 [1, 256, 8, 32]           590,080
+│    │    └─BatchNorm2d: 3-22            [1, 256, 8, 32]           512
+│    │    └─Conv2d: 3-23                 [1, 256, 8, 32]           33,024
+│    │    └─BatchNorm2d: 3-24            [1, 256, 8, 32]           512
+│    └─Residual: 2-10                    [1, 256, 8, 32]           --
+│    │    └─Conv2d: 3-25                 [1, 256, 8, 32]           590,080
+│    │    └─BatchNorm2d: 3-26            [1, 256, 8, 32]           512
+│    │    └─Conv2d: 3-27                 [1, 256, 8, 32]           590,080
+│    │    └─BatchNorm2d: 3-28            [1, 256, 8, 32]           512
+├─Sequential: 1-5                        [1, 512, 4, 16]           --
+│    └─Residual: 2-11                    [1, 512, 4, 16]           --
+│    │    └─Conv2d: 3-29                 [1, 512, 4, 16]           1,180,160
+│    │    └─BatchNorm2d: 3-30            [1, 512, 4, 16]           1,024
+│    │    └─Conv2d: 3-31                 [1, 512, 4, 16]           2,359,808
+│    │    └─BatchNorm2d: 3-32            [1, 512, 4, 16]           1,024
+│    │    └─Conv2d: 3-33                 [1, 512, 4, 16]           131,584
+│    │    └─BatchNorm2d: 3-34            [1, 512, 4, 16]           1,024
+│    └─Residual: 2-12                    [1, 512, 4, 16]           --
+│    │    └─Conv2d: 3-35                 [1, 512, 4, 16]           2,359,808
+│    │    └─BatchNorm2d: 3-36            [1, 512, 4, 16]           1,024
+│    │    └─Conv2d: 3-37                 [1, 512, 4, 16]           2,359,808
+│    │    └─BatchNorm2d: 3-38            [1, 512, 4, 16]           1,024
+├─AdaptiveAvgPool2d: 1-6                 [1, 512, 1, 1]            --
+├─Dropout: 1-7                           [1, 512, 1, 1]            --
+├─Flatten: 1-8                           [1, 512]                  --
+├─Linear: 1-9                            [1, 234]                  120,042
+==========================================================================================
+Total params: 11,295,082
+Trainable params: 11,295,082
+Non-trainable params: 0
+Total mult-adds (Units.GIGABYTES): 2.25
+==========================================================================================
+Input size (MB): 0.26
+Forward/backward pass size (MB): 51.15
+Params size (MB): 45.18
+Estimated Total Size (MB): 96.59
+==========================================================================================
+
+22:45:07 Epoch 1
+        Train stats:
+        Loss:  0.3049 | F1:  0.0072 | Precision:  0.0042 | Recall:  0.0380
+        Validation stats:
+        Loss:  0.2326 | F1:  0.0031 | Precision:  0.0025 | Recall:  0.0093
+        Epoch time: 56 seconds =  0.93 minutes
+        ===============================================================================================================        
+22:46:04 Epoch 2
+        Train stats:
+        Loss:  0.2012 | F1:  0.0052 | Precision:  0.0053 | Recall:  0.0063
+        Validation stats:
+        Loss:  0.2615 | F1:  0.0026 | Precision:  0.0033 | Recall:  0.0094
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+22:46:59 Epoch 3
+        Train stats:
+        Loss:  0.1848 | F1:  0.0044 | Precision:  0.0075 | Recall:  0.0038
+        Validation stats:
+        Loss:  0.2069 | F1:  0.0023 | Precision:  0.0064 | Recall:  0.0072
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+22:47:53 Epoch 4
+        Train stats:
+        Loss:  0.1726 | F1:  0.0078 | Precision:  0.0163 | Recall:  0.0060
+        Validation stats:
+        Loss:  0.1613 | F1:  0.0070 | Precision:  0.0096 | Recall:  0.0084
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+22:48:48 Epoch 5
+        Train stats:
+        Loss:  0.1623 | F1:  0.0223 | Precision:  0.0305 | Recall:  0.0201
+        Validation stats:
+        Loss:  0.1487 | F1:  0.0283 | Precision:  0.0606 | Recall:  0.0324
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+22:49:42 Epoch 6
+        Train stats:
+        Loss:  0.1530 | F1:  0.0353 | Precision:  0.0426 | Recall:  0.0360
+        Validation stats:
+        Loss:  0.1491 | F1:  0.0398 | Precision:  0.0654 | Recall:  0.0486
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+22:50:37 Epoch 7
+        Train stats:
+        Loss:  0.1435 | F1:  0.0493 | Precision:  0.0493 | Recall:  0.0550
+        Validation stats:
+        Loss:  0.1261 | F1:  0.0563 | Precision:  0.0960 | Recall:  0.0574
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+22:51:32 Epoch 8
+        Train stats:
+        Loss:  0.1363 | F1:  0.0667 | Precision:  0.0681 | Recall:  0.0764
+        Validation stats:
+        Loss:  0.1402 | F1:  0.0518 | Precision:  0.0621 | Recall:  0.0734
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+22:52:27 Epoch 9
+        Train stats:
+        Loss:  0.1329 | F1:  0.0733 | Precision:  0.0693 | Recall:  0.0888
+        Validation stats:
+        Loss:  0.1164 | F1:  0.0808 | Precision:  0.1220 | Recall:  0.0918
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+22:53:21 Epoch 10
+        Train stats:
+        Loss:  0.1262 | F1:  0.0848 | Precision:  0.0757 | Recall:  0.1060
+        Validation stats:
+        Loss:  0.1129 | F1:  0.1093 | Precision:  0.1358 | Recall:  0.1269
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+22:54:15 Epoch 11
+        Train stats:
+        Loss:  0.1232 | F1:  0.0943 | Precision:  0.0862 | Recall:  0.1148
+        Validation stats:
+        Loss:  0.1151 | F1:  0.1057 | Precision:  0.1340 | Recall:  0.1251
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+22:55:09 Epoch 12
+        Train stats:
+        Loss:  0.1167 | F1:  0.1097 | Precision:  0.0996 | Recall:  0.1393
+        Validation stats:
+        Loss:  0.1136 | F1:  0.1325 | Precision:  0.1552 | Recall:  0.1794
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+22:56:04 Epoch 13
+        Train stats:
+        Loss:  0.1145 | F1:  0.1167 | Precision:  0.1039 | Recall:  0.1489
+        Validation stats:
+        Loss:  0.1278 | F1:  0.1135 | Precision:  0.1643 | Recall:  0.1415
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+22:56:58 Epoch 14
+        Train stats:
+        Loss:  0.1177 | F1:  0.1176 | Precision:  0.1091 | Recall:  0.1426
+        Validation stats:
+        Loss:  0.1074 | F1:  0.1368 | Precision:  0.1797 | Recall:  0.1668
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+22:57:53 Epoch 15
+        Train stats:
+        Loss:  0.1144 | F1:  0.1270 | Precision:  0.1217 | Recall:  0.1537
+        Validation stats:
+        Loss:  0.1055 | F1:  0.1365 | Precision:  0.1708 | Recall:  0.1758
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+22:58:48 Epoch 16
+        Train stats:
+        Loss:  0.1096 | F1:  0.1435 | Precision:  0.1292 | Recall:  0.1795
+        Validation stats:
+        Loss:  0.0995 | F1:  0.1661 | Precision:  0.1922 | Recall:  0.2086
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+22:59:41 Epoch 17
+        Train stats:
+        Loss:  0.1078 | F1:  0.1533 | Precision:  0.1399 | Recall:  0.1908
+        Validation stats:
+        Loss:  0.0968 | F1:  0.1970 | Precision:  0.2313 | Recall:  0.2360
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+23:00:35 Epoch 18
+        Train stats:
+        Loss:  0.1034 | F1:  0.1653 | Precision:  0.1544 | Recall:  0.2072
+        Validation stats:
+        Loss:  0.0933 | F1:  0.1986 | Precision:  0.2134 | Recall:  0.2458
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:01:30 Epoch 19
+        Train stats:
+        Loss:  0.1010 | F1:  0.1692 | Precision:  0.1470 | Recall:  0.2178
+        Validation stats:
+        Loss:  0.0990 | F1:  0.1743 | Precision:  0.2436 | Recall:  0.1931
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:02:25 Epoch 20
+        Train stats:
+        Loss:  0.0995 | F1:  0.1744 | Precision:  0.1526 | Recall:  0.2177
+        Validation stats:
+        Loss:  0.1030 | F1:  0.1860 | Precision:  0.2333 | Recall:  0.2100
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:03:20 Epoch 21
+        Train stats:
+        Loss:  0.1018 | F1:  0.1871 | Precision:  0.1739 | Recall:  0.2264
+        Validation stats:
+        Loss:  0.1003 | F1:  0.1781 | Precision:  0.2419 | Recall:  0.2102
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+23:04:13 Epoch 22
+        Train stats:
+        Loss:  0.0982 | F1:  0.1899 | Precision:  0.1696 | Recall:  0.2380
+        Validation stats:
+        Loss:  0.0961 | F1:  0.2000 | Precision:  0.2283 | Recall:  0.2380
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:05:07 Epoch 23
+        Train stats:
+        Loss:  0.0977 | F1:  0.1974 | Precision:  0.1753 | Recall:  0.2471
+        Validation stats:
+        Loss:  0.1077 | F1:  0.2093 | Precision:  0.2702 | Recall:  0.2422
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:06:02 Epoch 24
+        Train stats:
+        Loss:  0.0947 | F1:  0.1949 | Precision:  0.1682 | Recall:  0.2514
+        Validation stats:
+        Loss:  0.0922 | F1:  0.2219 | Precision:  0.2469 | Recall:  0.2801
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:06:57 Epoch 25
+        Train stats:
+        Loss:  0.0952 | F1:  0.2029 | Precision:  0.1766 | Recall:  0.2584
+        Validation stats:
+        Loss:  0.0999 | F1:  0.2051 | Precision:  0.2362 | Recall:  0.2381
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:07:52 Epoch 26
+        Train stats:
+        Loss:  0.0961 | F1:  0.2097 | Precision:  0.1852 | Recall:  0.2614
+        Validation stats:
+        Loss:  0.0879 | F1:  0.2540 | Precision:  0.2703 | Recall:  0.2993
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:08:48 Epoch 27
+        Train stats:
+        Loss:  0.0891 | F1:  0.2327 | Precision:  0.2037 | Recall:  0.2963
+        Validation stats:
+        Loss:  0.0867 | F1:  0.2711 | Precision:  0.2638 | Recall:  0.3347
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:09:43 Epoch 28
+        Train stats:
+        Loss:  0.0885 | F1:  0.2312 | Precision:  0.2016 | Recall:  0.2922
+        Validation stats:
+        Loss:  0.0892 | F1:  0.2573 | Precision:  0.3018 | Recall:  0.2902
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:10:37 Epoch 29
+        Train stats:
+        Loss:  0.0867 | F1:  0.2425 | Precision:  0.2095 | Recall:  0.3036
+        Validation stats:
+        Loss:  0.0811 | F1:  0.2739 | Precision:  0.2794 | Recall:  0.3244
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:11:31 Epoch 30
+        Train stats:
+        Loss:  0.0786 | F1:  0.2665 | Precision:  0.2305 | Recall:  0.3437
+        Validation stats:
+        Loss:  0.0814 | F1:  0.2805 | Precision:  0.3022 | Recall:  0.3283
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+23:12:25 Epoch 31
+        Train stats:
+        Loss:  0.0836 | F1:  0.2529 | Precision:  0.2176 | Recall:  0.3218
+        Validation stats:
+        Loss:  0.0766 | F1:  0.2961 | Precision:  0.2963 | Recall:  0.3519
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:13:20 Epoch 32
+        Train stats:
+        Loss:  0.0821 | F1:  0.2671 | Precision:  0.2307 | Recall:  0.3380
+        Validation stats:
+        Loss:  0.0817 | F1:  0.2971 | Precision:  0.3093 | Recall:  0.3499
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+23:14:14 Epoch 33
+        Train stats:
+        Loss:  0.0856 | F1:  0.2544 | Precision:  0.2223 | Recall:  0.3190
+        Validation stats:
+        Loss:  0.1267 | F1:  0.2225 | Precision:  0.2585 | Recall:  0.3029
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:15:09 Epoch 34
+        Train stats:
+        Loss:  0.0939 | F1:  0.2423 | Precision:  0.2193 | Recall:  0.2934
+        Validation stats:
+        Loss:  0.1304 | F1:  0.1944 | Precision:  0.2011 | Recall:  0.2652
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:16:03 Epoch 35
+        Train stats:
+        Loss:  0.1017 | F1:  0.1974 | Precision:  0.1733 | Recall:  0.2459
+        Validation stats:
+        Loss:  0.1004 | F1:  0.2156 | Precision:  0.2524 | Recall:  0.2296
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:16:58 Epoch 36
+        Train stats:
+        Loss:  0.0900 | F1:  0.2363 | Precision:  0.2059 | Recall:  0.3036
+        Validation stats:
+        Loss:  0.0932 | F1:  0.2733 | Precision:  0.3105 | Recall:  0.2992
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:17:52 Epoch 37
+        Train stats:
+        Loss:  0.0859 | F1:  0.2579 | Precision:  0.2227 | Recall:  0.3320
+        Validation stats:
+        Loss:  0.0923 | F1:  0.2759 | Precision:  0.2943 | Recall:  0.3182
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:18:46 Epoch 38
+        Train stats:
+        Loss:  0.0845 | F1:  0.2709 | Precision:  0.2347 | Recall:  0.3428
+        Validation stats:
+        Loss:  0.0884 | F1:  0.2826 | Precision:  0.3111 | Recall:  0.3272
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:19:41 Epoch 39
+        Train stats:
+        Loss:  0.0805 | F1:  0.2946 | Precision:  0.2589 | Recall:  0.3649
+        Validation stats:
+        Loss:  0.0996 | F1:  0.2767 | Precision:  0.3085 | Recall:  0.3089
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:20:36 Epoch 40
+        Train stats:
+        Loss:  0.0811 | F1:  0.2798 | Precision:  0.2453 | Recall:  0.3511
+        Validation stats:
+        Loss:  0.0776 | F1:  0.3241 | Precision:  0.3336 | Recall:  0.3612
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:21:31 Epoch 41
+        Train stats:
+        Loss:  0.0773 | F1:  0.2950 | Precision:  0.2539 | Recall:  0.3715
+        Validation stats:
+        Loss:  0.0821 | F1:  0.3069 | Precision:  0.2936 | Recall:  0.3909
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+23:22:24 Epoch 42
+        Train stats:
+        Loss:  0.0754 | F1:  0.3154 | Precision:  0.2744 | Recall:  0.3952
+        Validation stats:
+        Loss:  0.0970 | F1:  0.2909 | Precision:  0.2945 | Recall:  0.3674
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:23:19 Epoch 43
+        Train stats:
+        Loss:  0.0739 | F1:  0.3097 | Precision:  0.2650 | Recall:  0.3934
+        Validation stats:
+        Loss:  0.0957 | F1:  0.3070 | Precision:  0.3168 | Recall:  0.3513
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+23:24:13 Epoch 44
+        Train stats:
+        Loss:  0.0749 | F1:  0.3039 | Precision:  0.2619 | Recall:  0.3809
+        Validation stats:
+        Loss:  0.0843 | F1:  0.3224 | Precision:  0.3163 | Recall:  0.3929
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:25:07 Epoch 45
+        Train stats:
+        Loss:  0.0776 | F1:  0.3166 | Precision:  0.2805 | Recall:  0.3914
+        Validation stats:
+        Loss:  0.0829 | F1:  0.3297 | Precision:  0.3410 | Recall:  0.3802
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:26:01 Epoch 46
+        Train stats:
+        Loss:  0.0719 | F1:  0.3165 | Precision:  0.2729 | Recall:  0.4012
+        Validation stats:
+        Loss:  0.0761 | F1:  0.3564 | Precision:  0.3688 | Recall:  0.4002
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:26:56 Epoch 47
+        Train stats:
+        Loss:  0.0732 | F1:  0.3369 | Precision:  0.2936 | Recall:  0.4158
+        Validation stats:
+        Loss:  0.0784 | F1:  0.3600 | Precision:  0.3660 | Recall:  0.4089
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:27:50 Epoch 48
+        Train stats:
+        Loss:  0.0782 | F1:  0.3223 | Precision:  0.2750 | Recall:  0.4051
+        Validation stats:
+        Loss:  0.1652 | F1:  0.1673 | Precision:  0.2491 | Recall:  0.2247
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:28:45 Epoch 49
+        Train stats:
+        Loss:  0.0951 | F1:  0.2201 | Precision:  0.1992 | Recall:  0.2648
+        Validation stats:
+        Loss:  0.0739 | F1:  0.3249 | Precision:  0.3265 | Recall:  0.3754
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+23:29:39 Epoch 50
+        Train stats:
+        Loss:  0.0821 | F1:  0.2853 | Precision:  0.2542 | Recall:  0.3488
+        Validation stats:
+        Loss:  0.0945 | F1:  0.2684 | Precision:  0.2776 | Recall:  0.3304
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:30:34 Epoch 51
+        Train stats:
+        Loss:  0.0748 | F1:  0.3165 | Precision:  0.2802 | Recall:  0.3923
+        Validation stats:
+        Loss:  0.0960 | F1:  0.3312 | Precision:  0.3294 | Recall:  0.4027
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:31:28 Epoch 52
+        Train stats:
+        Loss:  0.0728 | F1:  0.3257 | Precision:  0.2845 | Recall:  0.4047
+        Validation stats:
+        Loss:  0.0897 | F1:  0.3276 | Precision:  0.3391 | Recall:  0.3657
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+23:32:22 Epoch 53
+        Train stats:
+        Loss:  0.0741 | F1:  0.3375 | Precision:  0.3017 | Recall:  0.4081
+        Validation stats:
+        Loss:  0.0852 | F1:  0.3295 | Precision:  0.3571 | Recall:  0.3609
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:33:17 Epoch 54
+        Train stats:
+        Loss:  0.0702 | F1:  0.3497 | Precision:  0.3045 | Recall:  0.4320
+        Validation stats:
+        Loss:  0.0727 | F1:  0.3488 | Precision:  0.3320 | Recall:  0.4125
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:34:13 Epoch 55
+        Train stats:
+        Loss:  0.0700 | F1:  0.3407 | Precision:  0.2960 | Recall:  0.4239
+        Validation stats:
+        Loss:  0.0752 | F1:  0.3515 | Precision:  0.3525 | Recall:  0.3974
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:35:07 Epoch 56
+        Train stats:
+        Loss:  0.0720 | F1:  0.3410 | Precision:  0.3017 | Recall:  0.4216
+        Validation stats:
+        Loss:  0.0722 | F1:  0.3621 | Precision:  0.3610 | Recall:  0.4040
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:36:01 Epoch 57
+        Train stats:
+        Loss:  0.0634 | F1:  0.3795 | Precision:  0.3314 | Recall:  0.4670
+        Validation stats:
+        Loss:  0.0676 | F1:  0.3952 | Precision:  0.3930 | Recall:  0.4346
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:36:55 Epoch 58
+        Train stats:
+        Loss:  0.0677 | F1:  0.3676 | Precision:  0.3278 | Recall:  0.4384
+        Validation stats:
+        Loss:  0.0812 | F1:  0.3542 | Precision:  0.3427 | Recall:  0.4189
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:37:50 Epoch 59
+        Train stats:
+        Loss:  0.0662 | F1:  0.3661 | Precision:  0.3207 | Recall:  0.4462
+        Validation stats:
+        Loss:  0.0726 | F1:  0.3781 | Precision:  0.3752 | Recall:  0.4287
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:38:45 Epoch 60
+        Train stats:
+        Loss:  0.0687 | F1:  0.3587 | Precision:  0.3184 | Recall:  0.4317
+        Validation stats:
+        Loss:  0.0704 | F1:  0.4045 | Precision:  0.4046 | Recall:  0.4454
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:39:39 Epoch 61
+        Train stats:
+        Loss:  0.0643 | F1:  0.3800 | Precision:  0.3376 | Recall:  0.4566
+        Validation stats:
+        Loss:  0.0692 | F1:  0.3932 | Precision:  0.3786 | Recall:  0.4475
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+23:40:32 Epoch 62
+        Train stats:
+        Loss:  0.0607 | F1:  0.3919 | Precision:  0.3403 | Recall:  0.4827
+        Validation stats:
+        Loss:  0.0710 | F1:  0.3975 | Precision:  0.3916 | Recall:  0.4502
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:41:27 Epoch 63
+        Train stats:
+        Loss:  0.0625 | F1:  0.3931 | Precision:  0.3466 | Recall:  0.4769
+        Validation stats:
+        Loss:  0.0737 | F1:  0.3966 | Precision:  0.4052 | Recall:  0.4282
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:42:21 Epoch 64
+        Train stats:
+        Loss:  0.0606 | F1:  0.4058 | Precision:  0.3597 | Recall:  0.4875
+        Validation stats:
+        Loss:  0.0708 | F1:  0.4143 | Precision:  0.4161 | Recall:  0.4566
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:43:17 Epoch 65
+        Train stats:
+        Loss:  0.0625 | F1:  0.3967 | Precision:  0.3533 | Recall:  0.4726
+        Validation stats:
+        Loss:  0.0706 | F1:  0.4098 | Precision:  0.4202 | Recall:  0.4407
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:44:11 Epoch 66
+        Train stats:
+        Loss:  0.0609 | F1:  0.4057 | Precision:  0.3598 | Recall:  0.4859
+        Validation stats:
+        Loss:  0.0690 | F1:  0.4138 | Precision:  0.4300 | Recall:  0.4324
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:45:05 Epoch 67
+        Train stats:
+        Loss:  0.0595 | F1:  0.4238 | Precision:  0.3791 | Recall:  0.5043
+        Validation stats:
+        Loss:  0.0750 | F1:  0.4083 | Precision:  0.4072 | Recall:  0.4481
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:46:00 Epoch 68
+        Train stats:
+        Loss:  0.0619 | F1:  0.4093 | Precision:  0.3638 | Recall:  0.4922
+        Validation stats:
+        Loss:  0.0692 | F1:  0.4114 | Precision:  0.4077 | Recall:  0.4531
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:46:56 Epoch 69
+        Train stats:
+        Loss:  0.0579 | F1:  0.4311 | Precision:  0.3874 | Recall:  0.5069
+        Validation stats:
+        Loss:  0.0770 | F1:  0.3953 | Precision:  0.3870 | Recall:  0.4475
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:47:51 Epoch 70
+        Train stats:
+        Loss:  0.0608 | F1:  0.4186 | Precision:  0.3744 | Recall:  0.4954
+        Validation stats:
+        Loss:  0.0747 | F1:  0.3951 | Precision:  0.3941 | Recall:  0.4445
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:48:46 Epoch 71
+        Train stats:
+        Loss:  0.0594 | F1:  0.4092 | Precision:  0.3657 | Recall:  0.4885
+        Validation stats:
+        Loss:  0.0749 | F1:  0.4229 | Precision:  0.4149 | Recall:  0.4705
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:49:41 Epoch 72
+        Train stats:
+        Loss:  0.0567 | F1:  0.4328 | Precision:  0.3888 | Recall:  0.5091
+        Validation stats:
+        Loss:  0.0765 | F1:  0.4173 | Precision:  0.4134 | Recall:  0.4546
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:50:36 Epoch 73
+        Train stats:
+        Loss:  0.0561 | F1:  0.4336 | Precision:  0.3846 | Recall:  0.5204
+        Validation stats:
+        Loss:  0.0703 | F1:  0.4331 | Precision:  0.4245 | Recall:  0.4700
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:51:30 Epoch 74
+        Train stats:
+        Loss:  0.0553 | F1:  0.4513 | Precision:  0.4077 | Recall:  0.5260
+        Validation stats:
+        Loss:  0.0671 | F1:  0.4450 | Precision:  0.4529 | Recall:  0.4710
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:52:24 Epoch 75
+        Train stats:
+        Loss:  0.0531 | F1:  0.4472 | Precision:  0.4001 | Recall:  0.5271
+        Validation stats:
+        Loss:  0.0751 | F1:  0.4153 | Precision:  0.4196 | Recall:  0.4511
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:53:20 Epoch 76
+        Train stats:
+        Loss:  0.0510 | F1:  0.4586 | Precision:  0.4066 | Recall:  0.5432
+        Validation stats:
+        Loss:  0.0669 | F1:  0.4475 | Precision:  0.4532 | Recall:  0.4652
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:54:14 Epoch 77
+        Train stats:
+        Loss:  0.0571 | F1:  0.4461 | Precision:  0.4084 | Recall:  0.5092
+        Validation stats:
+        Loss:  0.0806 | F1:  0.4307 | Precision:  0.4365 | Recall:  0.4590
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+23:55:08 Epoch 78
+        Train stats:
+        Loss:  0.0515 | F1:  0.4737 | Precision:  0.4264 | Recall:  0.5521
+        Validation stats:
+        Loss:  0.0701 | F1:  0.4456 | Precision:  0.4475 | Recall:  0.4716
+        Epoch time: 56 seconds =  0.93 minutes
+        ===============================================================================================================        
+23:56:04 Epoch 79
+        Train stats:
+        Loss:  0.0552 | F1:  0.4478 | Precision:  0.4042 | Recall:  0.5206
+        Validation stats:
+        Loss:  0.0821 | F1:  0.4215 | Precision:  0.4323 | Recall:  0.4483
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:57:00 Epoch 80
+        Train stats:
+        Loss:  0.0521 | F1:  0.4616 | Precision:  0.4186 | Recall:  0.5386
+        Validation stats:
+        Loss:  0.0690 | F1:  0.4540 | Precision:  0.4549 | Recall:  0.4861
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+23:57:54 Epoch 81
+        Train stats:
+        Loss:  0.0512 | F1:  0.4747 | Precision:  0.4274 | Recall:  0.5503
+        Validation stats:
+        Loss:  0.0788 | F1:  0.4168 | Precision:  0.4169 | Recall:  0.4606
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+23:58:49 Epoch 82
+        Train stats:
+        Loss:  0.0491 | F1:  0.4801 | Precision:  0.4305 | Recall:  0.5628
+        Validation stats:
+        Loss:  0.0712 | F1:  0.4540 | Precision:  0.4559 | Recall:  0.4755
+        Epoch time: 52 seconds =  0.87 minutes
+        ===============================================================================================================        
+23:59:42 Epoch 83
+        Train stats:
+        Loss:  0.0518 | F1:  0.4780 | Precision:  0.4404 | Recall:  0.5478
+        Validation stats:
+        Loss:  0.0755 | F1:  0.4476 | Precision:  0.4619 | Recall:  0.4691
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+00:00:37 Epoch 84
+        Train stats:
+        Loss:  0.0464 | F1:  0.5002 | Precision:  0.4563 | Recall:  0.5724
+        Validation stats:
+        Loss:  0.0709 | F1:  0.4413 | Precision:  0.4460 | Recall:  0.4693
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+00:01:32 Epoch 85
+        Train stats:
+        Loss:  0.0494 | F1:  0.4923 | Precision:  0.4462 | Recall:  0.5655
+        Validation stats:
+        Loss:  0.0729 | F1:  0.4537 | Precision:  0.4537 | Recall:  0.4827
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+00:02:26 Epoch 86
+        Train stats:
+        Loss:  0.0492 | F1:  0.4918 | Precision:  0.4452 | Recall:  0.5643
+        Validation stats:
+        Loss:  0.0739 | F1:  0.4580 | Precision:  0.4610 | Recall:  0.4892
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+00:03:19 Epoch 87
+        Train stats:
+        Loss:  0.0458 | F1:  0.4968 | Precision:  0.4511 | Recall:  0.5704
+        Validation stats:
+        Loss:  0.0752 | F1:  0.4378 | Precision:  0.4505 | Recall:  0.4698
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+00:04:13 Epoch 88
+        Train stats:
+        Loss:  0.0462 | F1:  0.5036 | Precision:  0.4563 | Recall:  0.5771
+        Validation stats:
+        Loss:  0.0679 | F1:  0.4641 | Precision:  0.4682 | Recall:  0.4861
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+00:05:08 Epoch 89
+        Train stats:
+        Loss:  0.0486 | F1:  0.4860 | Precision:  0.4445 | Recall:  0.5565
+        Validation stats:
+        Loss:  0.0748 | F1:  0.4569 | Precision:  0.4666 | Recall:  0.4779
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+00:06:02 Epoch 90
+        Train stats:
+        Loss:  0.0477 | F1:  0.4928 | Precision:  0.4466 | Recall:  0.5686
+        Validation stats:
+        Loss:  0.0738 | F1:  0.4744 | Precision:  0.4862 | Recall:  0.4889
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+00:06:56 Epoch 91
+        Train stats:
+        Loss:  0.0453 | F1:  0.4976 | Precision:  0.4448 | Recall:  0.5806
+        Validation stats:
+        Loss:  0.0657 | F1:  0.4810 | Precision:  0.4848 | Recall:  0.4963
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+00:07:50 Epoch 92
+        Train stats:
+        Loss:  0.0483 | F1:  0.4999 | Precision:  0.4586 | Recall:  0.5676
+        Validation stats:
+        Loss:  0.0832 | F1:  0.4447 | Precision:  0.4579 | Recall:  0.4749
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+00:08:45 Epoch 93
+        Train stats:
+        Loss:  0.0489 | F1:  0.4994 | Precision:  0.4614 | Recall:  0.5627
+        Validation stats:
+        Loss:  0.0714 | F1:  0.4545 | Precision:  0.4597 | Recall:  0.4812
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+00:09:40 Epoch 94
+        Train stats:
+        Loss:  0.0466 | F1:  0.5082 | Precision:  0.4601 | Recall:  0.5843
+        Validation stats:
+        Loss:  0.0706 | F1:  0.4704 | Precision:  0.4716 | Recall:  0.4917
+        Epoch time: 55 seconds =  0.92 minutes
+        ===============================================================================================================        
+00:10:35 Epoch 95
+        Train stats:
+        Loss:  0.0474 | F1:  0.5096 | Precision:  0.4694 | Recall:  0.5779
+        Validation stats:
+        Loss:  0.0707 | F1:  0.4742 | Precision:  0.4813 | Recall:  0.4923
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+00:11:30 Epoch 96
+        Train stats:
+        Loss:  0.0473 | F1:  0.5049 | Precision:  0.4668 | Recall:  0.5693
+        Validation stats:
+        Loss:  0.0703 | F1:  0.4757 | Precision:  0.4847 | Recall:  0.4900
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+00:12:24 Epoch 97
+        Train stats:
+        Loss:  0.0465 | F1:  0.5058 | Precision:  0.4536 | Recall:  0.5862
+        Validation stats:
+        Loss:  0.0817 | F1:  0.4446 | Precision:  0.4617 | Recall:  0.4750
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+00:13:17 Epoch 98
+        Train stats:
+        Loss:  0.0462 | F1:  0.5102 | Precision:  0.4664 | Recall:  0.5799
+        Validation stats:
+        Loss:  0.0742 | F1:  0.4590 | Precision:  0.4708 | Recall:  0.4797
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+00:14:11 Epoch 99
+        Train stats:
+        Loss:  0.0463 | F1:  0.5071 | Precision:  0.4640 | Recall:  0.5785
+        Validation stats:
+        Loss:  0.0721 | F1:  0.4716 | Precision:  0.4743 | Recall:  0.4917
+        Epoch time: 54 seconds =  0.90 minutes
+        ===============================================================================================================        
+00:15:05 Epoch 100
+        Train stats:
+        Loss:  0.0445 | F1:  0.5122 | Precision:  0.4605 | Recall:  0.5904
+        Validation stats:
+        Loss:  0.0682 | F1:  0.4754 | Precision:  0.4803 | Recall:  0.4950
+        Epoch time: 53 seconds =  0.88 minutes
+        ===============================================================================================================        
+Best Validation F1 0.4810, Epoch: 91, Training Time: 5452.46s
