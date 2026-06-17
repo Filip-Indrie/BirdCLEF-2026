@@ -26,9 +26,6 @@ class CustomSpectrogramModel(nn.Module, ABC):
     def forward(self, x):
         return self._net(x)
 
-    def __str__(self):
-        return str(summary(self._net, input_size=(1, 1, 128, 501), verbose=0))
-
 class Residual(nn.Module):
     """The Residual block of ResNet."""
 
@@ -82,6 +79,9 @@ class ResNet18(CustomSpectrogramModel):
                             nn.Dropout(p=dropout),
                             nn.Flatten(), nn.Linear(512, NUM_CLASSES))
 
+    def __str__(self):
+        return str(summary(self._net, input_size=(1, 1, 128, 501), verbose=0))
+
     def load_weights(self, weights_path: str):
         self.load_state_dict(torch.load(weights_path, weights_only=True))
 
@@ -108,6 +108,9 @@ class EfficientNetB1(CustomSpectrogramModel):
         )
 
         self._net = base_model
+
+    def __str__(self):
+        return str(summary(self._net, input_size=(1, 3, 240, 240), verbose=0))
 
     def load_weights(self, weights_path: str):
         self.load_state_dict(torch.load(weights_path, weights_only=True))

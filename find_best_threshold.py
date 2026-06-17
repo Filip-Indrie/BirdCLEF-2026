@@ -8,8 +8,8 @@ from torchaudio.transforms import MelSpectrogram, AmplitudeToDB
 from matplotlib import pyplot as plt
 
 from load_utils import get_soundscapes_dataloader, get_single_bird_dataloader
-from spectrogram_models import ResNet18
-from train_utils import try_gpu, wave_to_spectrogram
+from spectrogram_models import *
+from train_utils import try_gpu, wave_to_spectrogram, get_spectrogram_transform
 
 load_dotenv()
 NUM_CLASSES = int(os.getenv("NUM_CLASSES"))
@@ -23,7 +23,7 @@ def init_spectrogram(device, window_length=1024, hop_length=320, n_mel_bands=128
     transform_db = AmplitudeToDB(stype='power').to(device)
     return lambda wave: transform_db(transform_spectrogram(wave))
 
-def evaluate_model(net, data_iter, spectrogram_transform, device):
+def evaluate_model(net, data_iter, spectrogram_transform, resize, device):
     net.eval()
 
     validation_loop = tqdm.tqdm(data_iter, desc="Validation Batches")
@@ -35,7 +35,11 @@ def evaluate_model(net, data_iter, spectrogram_transform, device):
         for wave, labels in validation_loop:
             wave, labels = wave.to(device), labels.to(device)
 
-            model_input = wave if spectrogram_transform is None else wave_to_spectrogram(wave, spectrogram_transform)
+            if spectrogram_transform is not None:
+                model_input = wave_to_spectrogram(wave, spectrogram_transform)
+                if resize is not None: model_input = resize(model_input)
+            else:
+                model_input = wave
 
             with torch.amp.autocast("cuda", dtype=torch.bfloat16):
                 logits = net(model_input)
@@ -64,9 +68,10 @@ def plot_scores(scores):
 if __name__ == "__main__":
     _device = try_gpu()
 
-    model = ResNet18()
+    model = EfficientNetB1()
+    spectrogram_resize = get_spectrogram_transform(240, 240)
     # weights_path = "./Measurements/ResNet18/Single Bird Training (OneCycleLR)/weights.pth" # 0.51 la 0.7 threshold
-    weights_path = "./Measurements/ResNet18/DELETE LATER/weights.pth"
+    weights_path = "./Measurements/EfficientNetB1/Training (240x240) 50 epochs/Soundscapes All Fine-Tune/weights.pth"
     state_dict = torch.load(weights_path, weights_only=True)
     model.load_state_dict(state_dict)
     model.to(_device)
@@ -78,7 +83,7 @@ if __name__ == "__main__":
 
     _, val_loader, _ = get_soundscapes_dataloader(_device, batch_size)
 
-    _probs, _labels = evaluate_model(model, val_loader, _spectrogram_transform, _device)
+    _probs, _labels = evaluate_model(model, val_loader, _spectrogram_transform, spectrogram_resize, _device)
 
     thresholds = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
 

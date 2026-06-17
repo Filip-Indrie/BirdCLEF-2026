@@ -7,18 +7,17 @@ if __name__ == '__main__':
         # model, weights_file, spectrogram_transform
         # (ResNet18(), "./Measurements/ResNet18/Single Bird Training (OneCycleLR)/weights.pth"),
         (EfficientNetB1(), None, get_spectrogram_transform(240, 240)),
-        # (EfficientNetB1(), None, get_spectrogram_transform(240, 940)),
     ]
 
     batch_size = 256
     patience = 10
 
-    weight_decay = 0.01
-    threshold = 0.5
+    weight_decay = 0.05
+    threshold = 0.45
     positive_label_smoothing = 0.1
 
     num_epochs_all = 40
-    lr_all = 5e-5
+    lr_all = 1e-5
 
     num_epochs_head = 10
     lr_head = 1e-3
@@ -27,7 +26,7 @@ if __name__ == '__main__':
 
     train_iter, val_iter, train_pos_weights = get_soundscapes_dataloader(
         device, batch_size, train_split=0.8, train_samples_per_epoch=28500, validation_total_samples=7200,
-        pos_weights_clamp_max=1
+        pos_weights_clamp_max=10
     )
     try:
         for net, weights_path, spectrogram_transform in nets:
@@ -41,7 +40,7 @@ if __name__ == '__main__':
                 lr_head, weight_decay, positive_label_smoothing, threshold, False,
                 train_iter, val_iter, train_pos_weights, num_epochs_head, num_epochs_head + 1,
                 save_weights=False,
-                save_folder="NoDataBalancing_clamp10/Soundscapes HEAD Fine-Tune"
+                save_folder="Training (240x240, lr=1e-5, wd=0.05)/Soundscapes HEAD Fine-Tune"
             )
 
             net.backbone_grad(True)
@@ -52,7 +51,7 @@ if __name__ == '__main__':
                 train_iter, val_iter, train_pos_weights, num_epochs_all, patience,
                 save_weights=True, # REMINDER: SET TO TRUE WHEN FULLY TRAINING,
                 save_json=True,
-                save_folder="NoDataBalancing_clamp10/Soundscapes ALL Fine-Tune"
+                save_folder="Training (240x240, lr=1e-5, wd=0.05)/Soundscapes ALL Fine-Tune"
             )
 
     except Exception as e:

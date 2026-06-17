@@ -8,7 +8,6 @@ if __name__ == '__main__':
         # net, pre_trained, spectrogram_transform
         # (ResNet18(), False, None),
         (EfficientNetB1(), True, get_spectrogram_transform(240, 240)),
-        # (EfficientNetB1(), True, get_spectrogram_transform(240, 940)),
     ]
 
     batch_size = 256
@@ -26,11 +25,12 @@ if __name__ == '__main__':
 
     try:
         for net, pre_trained, spectrogram_transform in nets:
+            epochs = num_epochs if not pre_trained else num_epochs // 2
             train_model(
                 device, net, True, pre_trained, spectrogram_transform,
                 lr, weight_decay, positive_label_smoothing, threshold, True,
                 train_iter, val_iter, pos_weights, num_epochs, patience, save_weights=True, save_json=True,
-                save_folder="Single Bird Training (240x240)"
+                save_folder="Training (240x240, lr=1e-5, wd=0.05)/Single Birds"
             )
     except Exception as e:
         with open("error.txt", "w") as f:
