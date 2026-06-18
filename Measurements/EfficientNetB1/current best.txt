@@ -1,1 +1,2 @@
-Training (240x240) 50 epochs
+Single birds: Training (240x240) 50 epochs
+Soundscapes: Training (240x240) 50 epochs

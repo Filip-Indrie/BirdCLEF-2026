@@ -20,7 +20,7 @@ NUM_CLASSES = int(os.getenv("NUM_CLASSES"))
 RANDOM_SEED = int(os.getenv("RANDOM_SEED"))
 DATASET_FOLDER = os.getenv("DATASET_FOLDER")
 
-__all__ = ["get_soundscapes_dataloader", "get_single_bird_dataloader", "NocallMixer"]
+__all__ = ["get_soundscapes_dataloader", "get_single_bird_dataloader", "NocallMixer", "get_waveform"]
 
 def get_waveform(path: str, start: int | None = None):
     """

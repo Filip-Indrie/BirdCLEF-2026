@@ -1,1 +1,2 @@
-Training (299x299)
+Single birds: Training (299x299)
+Soundscapes: Training (299x299, less augmented)

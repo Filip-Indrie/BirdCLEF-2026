@@ -17,7 +17,7 @@ load_dotenv()
 NUM_CLASSES = int(os.getenv("NUM_CLASSES"))
 TARGET_SAMPLE_RATE = int(os.getenv("TARGET_SAMPLE_RATE"))
 
-__all__ = ['train_model', 'try_gpu', 'wave_to_spectrogram', 'get_spectrogram_transform']
+__all__ = ['train_model', 'try_gpu', 'wave_to_spectrogram', 'get_spectrogram_transform', "init_spectrogram"]
 
 def get_spectrogram_transform(size1: int, size2: int):
     return v2.Compose([

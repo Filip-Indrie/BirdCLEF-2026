@@ -1,1 +1,2 @@
-OneCycleLR
+Single birds: Focal loss, Label smoothing, Noise Introduction/Single birds
+Soundscapes: POS_WEIGHT_CLAMP_10
