@@ -7,7 +7,7 @@ if __name__ == '__main__':
         # model, weights_file, spectrogram_transform
         # (ResNet18(), "./Measurements/ResNet18/Single Bird Training (OneCycleLR)/weights.pth"),
         # (EfficientNetB1(), None, get_spectrogram_transform(240, 240)),
-        (InceptionV3(), None, get_spectrogram_transform(299, 299)),
+        (InceptionV3(), "./Measurements/InceptionV3/Training (299x299)/Single Birds/weights.pth", get_spectrogram_transform(299, 299)),
     ]
 
     batch_size = 256
