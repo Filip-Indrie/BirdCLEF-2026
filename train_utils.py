@@ -182,7 +182,7 @@ class MultiLabelFocalLoss(nn.Module):
 def train_model(
         device, net, spectrogram_model: bool, pre_trained: bool, reshape,
         lr, weight_decay, positive_label_smoothing: float, threshold: float, add_noise: bool,
-        train_iter, val_iter, pos_weights, num_epochs, patience, time_masking, freq_masking,
+        train_iter, val_iter, pos_weights, num_epochs, patience, time_masking, freq_masking, focal_gamma,
         delete_old_measurements: bool = False, save_json: bool = False, save_weights: bool = False,
         save_folder: str | None = None
 ):
@@ -218,7 +218,7 @@ def train_model(
     best_weights = None
     counter = 0
 
-    loss = MultiLabelFocalLoss(pos_weight=pos_weights, gamma=2)
+    loss = MultiLabelFocalLoss(pos_weight=pos_weights, gamma=focal_gamma)
 
     if not pre_trained:
         net.apply(init_weights)

@@ -15,7 +15,9 @@ if __name__ == '__main__':
 
     weight_decay = 0.01
     threshold = 0.45
-    positive_label_smoothing = 0.1
+
+    positive_label_smoothing_head = 0.1
+    positive_label_smoothing_all = 0.2
 
     num_epochs_all = 40
     lr_all = 5e-5
@@ -38,21 +40,23 @@ if __name__ == '__main__':
 
             train_model(
                 device, net, True, True, spectrogram_transform,
-                lr_head, weight_decay, positive_label_smoothing, threshold, False,
-                train_iter, val_iter, train_pos_weights, num_epochs_head, num_epochs_head + 1, 15, 8,
+                lr_head, weight_decay, positive_label_smoothing_head, threshold, False,
+                train_iter, val_iter, train_pos_weights, num_epochs_head, num_epochs_head + 1,
+                15, 8, 2,
                 save_weights=False,
-                save_folder="Training (299x299)/Soundscapes HEAD Fine-Tune"
+                save_folder="Training (299x299, PLS=0.2, gamma=3)/Soundscapes HEAD Fine-Tune"
             )
 
             net.backbone_grad(True)
 
             train_model(
                 device, net, True, True, spectrogram_transform,
-                lr_all, weight_decay, positive_label_smoothing, threshold, False,
-                train_iter, val_iter, train_pos_weights, num_epochs_all, patience, 15, 8,
+                lr_all, weight_decay, positive_label_smoothing_all, threshold, False,
+                train_iter, val_iter, train_pos_weights, num_epochs_all, patience,
+                15, 8, 3,
                 save_weights=True, # REMINDER: SET TO TRUE WHEN FULLY TRAINING,
                 save_json=True,
-                save_folder="Training (299x299)/Soundscapes ALL Fine-Tune"
+                save_folder="Training (299x299, PLS=0.2, gamma=3)/Soundscapes ALL Fine-Tune"
             )
 
     except Exception as e:
