@@ -1,0 +1,50 @@
+spectrogram_resize = v2.Compose([
+    v2.Resize((size1, size2), antialias=True),
+    v2.Lambda(lambda x: torch.cat([x, x, x], dim=1)),
+    v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+
+Training Hyperparameters:
+    - Stage 1 (single birds):
+        batch_size = 256
+        num_epochs = 100
+        patience = 15
+        threshold = 0.7
+
+        lr = 5e-3
+        weight_decay = 0.01
+        threshold = 0.7
+        positive_label_smoothing = 0.1
+        pos_weights_clamp = 100
+
+        add_noise = True
+        time_masking = 30
+        freq_masking = 15
+
+    - Stage 2 (head warmup on soundscapes):
+        batch_size = 256
+        weight_decay = 0.01
+        threshold = 0.45
+
+        add_noise = False
+        time_masking = 15
+        freq_masking = 8
+
+        num_epochs_head = 10
+        lr_head = 1e-3
+        patience = None (full training)
+        positive_label_smoothing_head = 0.1
+
+    - Stage 3 (full model fine-tuning on soundscapes)
+        batch_size = 256
+        weight_decay = 0.01
+        threshold = 0.45
+
+        add_noise = False
+        time_masking = 15
+        freq_masking = 8
+
+        num_epochs_all = 40
+        lr_all = 5e-5
+        patience = 10
+        positive_label_smoothing_all = 0.2
